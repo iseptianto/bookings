@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMONG TAMU</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.teal-theme {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        body.iframe-mode {
+            background: transparent !important;
+
+
+        }
+
+        body.iframe-mode.header {
+            border-radius: 10px;
+        }
+
+        body.iframe-mode .container {
+            background: white;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        body.teal-theme .header {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        body.teal-theme .form-group input:focus {
+            border-color: #14b8a6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Time Slots Grid */
+        .time-slots-container {
+            margin-top: 20px;
+        }
+
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+
+        body.teal-theme .time-slot:hover {
+            border-color: #14b8a6;
+        }
+
+        .time-slot.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        body.teal-theme .time-slot.selected {
+            border-color: #14b8a6;
+            background: #14b8a6;
+        }
+
+        .time-slot.disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+            border-color: #d1d5db;
+        }
+
+        .time-slot.disabled:hover {
+            border-color: #d1d5db;
+            background: #f3f4f6;
+        }
+
+        .time-slot.booked {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+            cursor: not-allowed;
+        }
+
+        .time-slot.booked:hover {
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        body.teal-theme .btn {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.warning {
+            background: #f59e0b;
+        }
+
+        .toast.success {
+            background: #059669;
+        }
+
+        body.teal-theme .toast.success {
+            background: #0d9488;
+        }
+
+        body.teal-theme.iframe-mode .toast.success {
+            background: #059669;
+            border: 2px solid #047857;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        body.teal-theme .toast.error {
+            background: #dc2626;
+        }
+
+        body.teal-theme .toast.warning {
+            background: #f59e0b;
+        }
+
+        .toast i {
+            margin-right: 8px;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading .time-slot {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .business-hours {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+
+        body.teal-theme .business-hours {
+            background: #ccfbf1;
+            border: 1px solid #5eead4;
+            color: #0f766e;
+        }
+
+        .business-hours h4 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .business-hours ul {
+            margin-left: 20px;
+        }
+
+        .business-hours li {
+            margin-bottom: 4px;
+        }
+
+        .test-scenarios {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        body.teal-theme .test-scenarios {
+            display: none;
+        }
+
+        .test-scenarios h3 {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .scenario-btn {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .scenario-btn:hover {
+            background: #d1d5db;
+        }
+
+        .scenario-btn.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .scenario-btn.error {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        body.teal-theme .toggle-switch.active {
+            background: #14b8a6;
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(30px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 16px;
+        }
+
+        .toggle-label.active {
+            color: #667eea;
+        }
+
+        body.teal-theme .toggle-label.active {
+            color: #14b8a6;
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: none;
+            height: 500px;
+            flex-direction: column;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-height: 400px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-message .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-message.user .avatar {
+            background: #667eea;
+        }
+
+        body.teal-theme .chat-message.user .avatar {
+            background: #14b8a6;
+        }
+
+        .chat-message.bot .avatar {
+            background: #6b7280;
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user .chat-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        body.teal-theme .chat-message.user .chat-bubble {
+            background: #14b8a6;
+        }
+
+        .chat-message.bot .chat-bubble {
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        body.teal-theme .chat-input:focus {
+            border-color: #14b8a6;
+        }
+
+        .chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        body.teal-theme .chat-send-btn {
+            background: #14b8a6;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            max-width: 80%;
+            color: #6b7280;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Markdown Styles */
+        .chat-bubble h1,
+        .chat-bubble h2,
+        .chat-bubble h3 {
+            margin: 8px 0 4px 0;
+            color: inherit;
+        }
+
+        .chat-bubble h1 {
+            font-size: 18px;
+        }
+
+        .chat-bubble h2 {
+            font-size: 16px;
+        }
+
+        .chat-bubble h3 {
+            font-size: 14px;
+        }
+
+        .chat-bubble p {
+            margin: 6px 0;
+            line-height: 1.4;
+        }
+
+        .chat-bubble strong {
+            font-weight: 600;
+        }
+
+        .chat-bubble a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .chat-bubble a:hover {
+            text-decoration: underline;
+        }
+
+        .chat-bubble ul,
+        .chat-bubble ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .chat-bubble li {
+            margin: 4px 0;
+        }
+
+        .chat-bubble code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .chat-bubble pre {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 8px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .chat-bubble blockquote {
+            border-left: 3px solid #e5e7eb;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-check"></i>AMONG TAMU</h1>
+            <p>Terima kasih sudah mampir ke booth kami among tamu solo! Silahkan dapat mengisi Guest Book dan Follow instagram @amongtamusolo dan tiktok @amongtamusolo_ kemudian Team kami akan melakukan Follow Up</p>
+        </div>
+
+        <div class="form-container">
+            <!-- Toggle between Form and Chat -->
+            <div class="toggle-container">
+                <span class="toggle-label active" id="form-label">📋 Booking Form</span>
+                <div class="toggle-switch" id="mode-toggle">
+                    <div class="toggle-knob"></div>
+                </div>
+                <span class="toggle-label" id="chat-label">💬 Chat Assistant</span>
+            </div>
+
+            <!-- Booking Form -->
+            <form id="booking-form">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+62123456789" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Select Date *</label>
+                    <input type="date" id="date" name="date" required min="">
+                </div>
+
+                <div class="form-group">
+                    <label>Available Time Slots *</label>
+                    <div class="time-slots-container">
+                        <div class="time-slots-grid" id="time-slots-grid">
+                            <!-- Time slots will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Booking
+                </button>
+            </form>
+
+            <!-- Chat Interface -->
+            <div class="chat-container" id="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-message bot">
+                        <div class="avatar">🤖</div>
+                        <div class="chat-bubble">
+                            <p>Hello! I'm your booking assistant. You can ask me to help you book an appointment.</p>
+                            <p><strong>Try saying:</strong></p>
+                            <ul>
+                                <li>"Book me an appointment"</li>
+                                <li>"I need to schedule a meeting"</li>
+                                <li>"Available times tomorrow"</li>
+                                <li>"My name is eden, email eden@example.com, phone +62823456789"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typing-indicator">
+                    <div class="typing-dots">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                    Assistant is typing...
+                </div>
+
+                <div class="chat-input-container">
+                    <textarea 
+                        id="chat-input" 
+                        class="chat-input" 
+                        placeholder="Type your message here..."
+                        rows="1"></textarea>
+                    <button type="button" id="chat-send-btn" class="chat-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="business-hours">
+                <h4><i class="fas fa-clock"></i> Business Hours</h4>
+                <ul>
+                    <li><strong>Days:</strong> Monday to Friday</li>
+                    <li><strong>Hours:</strong> 9:00 AM - 10:00 AM Indonesia time</li>
+                    <li><strong>Closed:</strong> 17:00 PM Last Booking</li>
+                </ul>
+            </div>
+
+            <div class="test-scenarios">
+                <h3><i class="fas fa-flask"></i> Quick Test Scenarios</h3>
+                <p>Click any button to auto-fill the form with test data:</p>
+
+                <button class="scenario-btn success" onclick="fillForm('valid')">
+                    ✅ Valid Booking
+                </button>
+
+                <button class="scenario-btn error" onclick="fillForm('weekend')">
+                    ❌ Weekend Booking
+                </button>
+
+                <button class="scenario-btn error" onclick="fillForm('invalid-email')">
+                    ❌ Invalid Email
+                </button>
+
+                <button class="scenario-btn error" onclick="fillForm('missing-fields')">
+                    ❌ Missing Fields
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAIN_URL_MAKE_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/make-booking';
+        const MAIN_URL_CHECK_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/check-booking-date';
+        const MAIN_URL_CHAT_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/chat-booking-date';
+        // Check for theme parameter and apply teal theme
+        function checkTheme() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const theme = urlParams.get('theme');
+            const iframeMode = urlParams.get('iframeMode');
+
+            if (theme === 'teal') {
+                document.body.classList.add('teal-theme');
+            }
+
+            if (iframeMode === 'true') {
+                document.body.classList.add('iframe-mode');
+            }
+        }
+
+        // Apply theme on page load
+        checkTheme();
+
+        // Global variables
+        let selectedTimeSlot = null;
+        let availableSlots = [];
+        let bookedSlots = [];
+        let chatMode = false;
+        let chatSessionId = null;
+
+        // Generate unique session ID
+        function generateSessionId() {
+            return Date.now().toString();
+        }
+
+        // Initialize chat session
+        function initChatSession() {
+            chatSessionId = generateSessionId();
+        }
+
+        // Markdown to HTML converter
+        function markdownToHtml(markdown) {
+            // Convert markdown to HTML
+            return markdown
+                // Headers
+                .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+                // Bold
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Links
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+                // Line breaks
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                // Wrap in paragraphs
+                .replace(/^(.*)$/gm, '<p>$1</p>')
+                // Clean up empty paragraphs
+                .replace(/<p><\/p>/g, '')
+                // Fix headers inside paragraphs
+                .replace(/<p>(<h[1-3]>.*?<\/h[1-3]>)<\/p>/g, '$1')
+                // Fix lists
+                .replace(/- (.*?)(?=<br>|$)/g, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+                .replace(/<\/ul><br><ul>/g, '')
+                // Emojis and icons
+                .replace(/📅/g, '📅')
+                .replace(/🕘/g, '🕘')
+                .replace(/📧/g, '📧')
+                .replace(/📱/g, '📱')
+                .replace(/🎉/g, '🎉')
+                .replace(/😊/g, '😊');
+        }
+
+        // Toggle between form and chat modes
+        function toggleMode() {
+            chatMode = !chatMode;
+            const toggle = document.getElementById('mode-toggle');
+            const formLabel = document.getElementById('form-label');
+            const chatLabel = document.getElementById('chat-label');
+            const bookingForm = document.getElementById('booking-form');
+            const chatContainer = document.getElementById('chat-container');
+            const businessHours = document.querySelector('.business-hours');
+            const testScenarios = document.querySelector('.test-scenarios');
+
+            if (chatMode) {
+                // Switch to chat mode
+                toggle.classList.add('active');
+                formLabel.classList.remove('active');
+                chatLabel.classList.add('active');
+                bookingForm.style.display = 'none';
+                chatContainer.classList.add('active');
+                businessHours.style.display = 'none';
+                if (testScenarios) testScenarios.style.display = 'none';
+                
+                // Initialize chat session if not already done
+                if (!chatSessionId) {
+                    initChatSession();
+                }
+            } else {
+                // Switch to form mode
+                toggle.classList.remove('active');
+                formLabel.classList.add('active');
+                chatLabel.classList.remove('active');
+                bookingForm.style.display = 'block';
+                chatContainer.classList.remove('active');
+                businessHours.style.display = 'block';
+                if (testScenarios) testScenarios.style.display = 'block';
+            }
+        }
+
+        // Add chat message
+        function addChatMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            
+            if (isUser) {
+                bubble.textContent = message;
+            } else {
+                bubble.innerHTML = markdownToHtml(message);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.classList.add('show');
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.classList.remove('show');
+        }
+
+        // Send chat message
+        async function sendChatMessage(message) {
+            if (!message.trim()) return;
+            
+            // Add user message
+            addChatMessage(message, true);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Disable send button
+            const sendBtn = document.getElementById('chat-send-btn');
+            sendBtn.disabled = true;
+            
+            try {
+                const response = await fetch(MAIN_URL_CHAT_BOOKING, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat: message,
+                        unique: chatSessionId
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Chat response:', data);
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Handle different response formats
+                let botMessage = '';
+                
+                if (typeof data === 'string') {
+                    // Plain text string response
+                    botMessage = data;
+                } else if (Array.isArray(data) && data.length > 0 && data[0].output) {
+                    // Array format with output property
+                    botMessage = data[0].output;
+                } else if (data && typeof data === 'object' && data.output) {
+                    // Object format with output property
+                    botMessage = data.output;
+                } else if (data && typeof data === 'object' && data.message) {
+                    // Object format with message property
+                    botMessage = data.message;
+                } else {
+                    // Fallback error message
+                    botMessage = 'Sorry, I encountered an error. Please try again.';
+                }
+                
+                addChatMessage(botMessage, false);
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                hideTypingIndicator();
+                addChatMessage('Sorry, I encountered an error. Please try again.', false);
+            } finally {
+                // Re-enable send button
+                sendBtn.disabled = false;
+            }
+        }
+
+        // Auto-resize textarea
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Test data scenarios
+        const testScenarios = {
+            valid: {
+                name: 'John Doe',
+                email: 'john@example.com',
+                phone: '+62123456789',
+                date: getNextWeekday()
+            },
+            weekend: {
+                name: 'Weekend User',
+                email: 'weekend@example.com',
+                phone: '+62123456790',
+                date: getNextWeekend()
+            },
+            'invalid-email': {
+                name: 'Bad Email User',
+                email: 'invalid-email',
+                phone: '+62123456793',
+                date: getNextWeekday()
+            },
+            'missing-fields': {
+                name: '',
+                email: '',
+                phone: '',
+                date: ''
+            }
+        };
+
+        function getNextWeekday() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+
+            while (tomorrow.getDay() === 0 || tomorrow.getDay() === 6) {
+                tomorrow.setDate(tomorrow.getDate() + 1);
+            }
+
+            return tomorrow.toISOString().split('T')[0];
+        }
+
+        function getNextWeekend() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+
+            while (tomorrow.getDay() !== 0 && tomorrow.getDay() !== 6) {
+                tomorrow.setDate(tomorrow.getDate() + 1);
+            }
+
+            return tomorrow.toISOString().split('T')[0];
+        }
+
+        function fillForm(scenario) {
+            const data = testScenarios[scenario];
+            if (!data) return;
+
+            document.getElementById('name').value = data.name;
+            document.getElementById('email').value = data.email;
+            document.getElementById('phone').value = data.phone;
+            document.getElementById('date').value = data.date;
+
+            // Trigger date change to load time slots
+            if (data.date) {
+                checkDateAndLoadSlots(data.date);
+            }
+        }
+
+        function showToast(message, type = 'error') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
+
+            document.body.appendChild(toast);
+
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Hide toast after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 5000);
+        }
+
+        function checkDateAndLoadSlots(date) {
+            const timeSlotsGrid = document.getElementById('time-slots-grid');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Check if date is earlier than today
+            const today = new Date();
+            const selectedDate = new Date(date);
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626; font-weight: 500;"><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>Cannot book appointments for dates earlier than today</div>';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // Show loading state
+            timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Loading time slots...</div>';
+            submitBtn.disabled = true;
+
+            // Check for holidays and get available slots
+            fetch( MAIN_URL_CHECK_BOOKING, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: date })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Holiday check response:', data);
+
+                    if (data.success) {
+                        if (data.isHoliday) {
+                            timeSlotsGrid.innerHTML = `<div style="text-align: center; padding: 20px; color: #dc2626;">${data.holidayMessage}</div>`;
+                            submitBtn.disabled = true;
+                            return;
+                        }
+
+                        if (data.isWeekend) {
+                            timeSlotsGrid.innerHTML = `<div style="text-align: center; padding: 20px; color: #dc2626;">${data.weekendMessage}</div>`;
+                            submitBtn.disabled = true;
+                            return;
+                        }
+
+                        // Load available time slots
+                        availableSlots = data.availableSlots || [];
+                        loadTimeSlots(availableSlots);
+                    } else {
+                        showToast(data.error || 'Failed to check date availability', 'error');
+                        timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Error loading time slots</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking date:', error);
+                    showToast('Error checking date availability', 'error');
+                    timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Error loading time slots</div>';
+                });
+        }
+
+        function loadTimeSlots(slots) {
+            const timeSlotsGrid = document.getElementById('time-slots-grid');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!slots || slots.length === 0) {
+                timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">No time slots available for this date</div>';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            timeSlotsGrid.innerHTML = '';
+
+            slots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot.display;
+                slotElement.dataset.time = slot.time;
+
+                if (slot.available === false) {
+                    slotElement.classList.add('booked');
+                    slotElement.title = 'This slot is already booked';
+                } else {
+                    slotElement.addEventListener('click', () => selectTimeSlot(slotElement, slot.time));
+                }
+
+                timeSlotsGrid.appendChild(slotElement);
+            });
+
+            submitBtn.disabled = false;
+        }
+
+        function selectTimeSlot(element, time) {
+            // Remove previous selection
+            document.querySelectorAll('.time-slot.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Add selection to clicked element
+            element.classList.add('selected');
+            selectedTimeSlot = time;
+
+            console.log('Selected time slot:', time);
+        }
+
+        // Date change handler
+        document.getElementById('date').addEventListener('change', function (e) {
+            const selectedDate = e.target.value;
+            if (selectedDate) {
+                checkDateAndLoadSlots(selectedDate);
+                selectedTimeSlot = null; // Reset selected slot
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('booking-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!selectedTimeSlot) {
+                showToast('Please select a time slot', 'error');
+                return;
+            }
+
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                date: document.getElementById('date').value,
+                time: selectedTimeSlot,
+                source: 'Booking System'
+            };
+
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitButton.disabled = true;
+
+            fetch(MAIN_URL_MAKE_BOOKING, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data);
+
+                    if (data.success) {
+                        showToast(data.confirmationMessage || 'Booking confirmed!', 'success');
+
+                        // Check if in iframe mode and send signal to parent
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const iframeMode = urlParams.get('iframeMode');
+
+                        console.log('iframeMode:', iframeMode);
+                        console.log('window.parent !== window:', window.parent !== window);
+
+                        if (iframeMode === 'true') {
+                            // Send signal to parent window to close modal
+                            console.log('Sending message to parent...');
+                            window.parent.postMessage({
+                                type: 'booking-submitted',
+                                success: true,
+                                data: data
+                            }, '*');
+                        }
+
+                        // Reset form
+                        this.reset();
+                        selectedTimeSlot = null;
+                        document.getElementById('time-slots-grid').innerHTML = '';
+                        const submitButton = this.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                    } else {
+                        showToast(data.error || data.message || 'Booking failed', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                });
+        });
+
+        // Set default date to next weekday
+        document.getElementById('date').value = getNextWeekday();
+
+        // Load time slots for default date
+        setTimeout(() => {
+            checkDateAndLoadSlots(getNextWeekday());
+        }, 100);
+
+        // Event Listeners
+        
+        // Toggle switch click handler
+        document.getElementById('mode-toggle').addEventListener('click', toggleMode);
+        
+        // Chat input handlers
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        
+        // Auto-resize chat input
+        chatInput.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+        
+        // Send message on Enter (but allow Shift+Enter for new lines)
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = this.value.trim();
+                if (message) {
+                    sendChatMessage(message);
+                    this.value = '';
+                    autoResizeTextarea(this);
+                }
+            }
+        });
+        
+        // Send message on button click
+        chatSendBtn.addEventListener('click', function() {
+            const message = chatInput.value.trim();
+            if (message) {
+                sendChatMessage(message);
+                chatInput.value = '';
+                autoResizeTextarea(chatInput);
+            }
+        });
+        
+        // Initialize chat session on page load
+        initChatSession();
+    </script>
+</body>
+
+</html>

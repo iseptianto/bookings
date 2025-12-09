@@ -1,0 +1,1485 @@
+{
+  "name": "Booking Restaurant",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. name + email validation\n2. phone validation\n3. date time validation",
+        "height": 304,
+        "width": 384,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        1344
+      ],
+      "typeVersion": 1,
+      "id": "1cd44d40-bc33-4c08-86ce-98058cdaaf86",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. datetime is weekend \n2. datetime is non-business hours \n3. datetime is lunch or dinner hours",
+        "height": 288,
+        "width": 400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        1312
+      ],
+      "typeVersion": 1,
+      "id": "44cddf35-55bd-488d-ab45-dd0684ef52ea",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. datetime is conflicting with  another event\n2. datetime is a indonesia public holiday ",
+        "height": 304,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        880
+      ],
+      "typeVersion": 1,
+      "id": "25ba871d-2105-428b-b14e-d53fc0b9e405",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Checking datetime  \n1. Malaysian public holiday\n2. Event booking conflict",
+        "height": 736,
+        "width": 1120,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "0ddb0bb0-67f5-41f3-878b-18ec64c87677",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Checking datetime  \n1. is a weekend working day?\n2. is a non-business hours?\n3. is a lunch or dinner hours?",
+        "height": 736,
+        "width": 864,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5232,
+        1104
+      ],
+      "typeVersion": 1,
+      "id": "5a5cb15b-cf04-4eaf-a995-a2fbd5e1b4da",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Checking input received\n1. is a valid name, email?\n2. is a valid phone number?\n3. is a valid date time?",
+        "height": 736,
+        "width": 816,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5152,
+        1856
+      ],
+      "typeVersion": 1,
+      "id": "aa3945ad-9090-4865-ab61-f7e3c995d04a",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Creating the calendar entry\n ",
+        "height": 720,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        2000
+      ],
+      "typeVersion": 1,
+      "id": "b3924dee-9fdc-4d0d-be0c-2d92644a62e2",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for making a booking\nReceives the input name,email,phone and datetime for booking",
+        "height": 736,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5056,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "7cc7b531-b4bc-4a35-8c85-28292b0232ec",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for getting booking slots by specific date\nReceives the timeslots for booking",
+        "height": 416,
+        "width": 1712,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        944
+      ],
+      "typeVersion": 1,
+      "id": "58eb87e2-de19-4e1b-8e92-b853a4187d2b",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for chatting with ai agent\nDo the 2 above operations but with a chatbot",
+        "height": 576,
+        "width": 1552,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        2224
+      ],
+      "typeVersion": 1,
+      "id": "f15bcb2d-bd0b-47ce-9a78-88fc3893dbf0",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "book2",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "df9c97ae-5fad-4c25-9f63-5d20269ffc54",
+      "name": "Booking Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3488,
+        1664
+      ],
+      "webhookId": "75d87c81-1d87-4e82-9b8f-752f0c384269"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and validate incoming booking data\nconst inputData = $input.first().json.body ||{};\n\n// Extract booking information\nconst bookingData = {\n  name: inputData.name || '',\n  email: inputData.email || '',\n  phone: inputData.phone || '',\n  date: inputData.date || '',\n  time: inputData.time || '',\n  partySize: inputData.partySize || 1,\n  allergies: inputData.allergies || '',\n  specialRequests: inputData.specialRequests || '',\n  source: inputData.source || 'Unknown',\n  timestamp: new Date().toISOString()\n};\n\n// Validate required fields\nconst requiredFields = ['name', 'email', 'phone', 'date', 'time', 'partySize'];\nconst missingFields = requiredFields.filter(field => !bookingData[field]);\n\nif (missingFields.length > 0) {\n  return {\n    success: false,\n    error: `Missing required fields: ${missingFields.join(', ')}`,\n    bookingData: null\n  };\n}\n\n// Validate email format\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(bookingData.email)) {\n  return {\n    success: false,\n    error: 'Invalid email format',\n    bookingData: null\n  };\n}\n\n// Validate phone format (basic validation)\nconst phoneRegex = /^[+]?[0-9\\s\\-()]{10,}$/;\nif (!phoneRegex.test(bookingData.phone)) {\n  return {\n    success: false,\n    error: 'Invalid phone number format',\n    bookingData: null\n  };\n}\n\n// Validate date format (YYYY-MM-DD)\nconst dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\nif (!dateRegex.test(bookingData.date)) {\n  return {\n    success: false,\n    error: 'Invalid date format. Please use YYYY-MM-DD',\n    bookingData: null\n  };\n}\n\n// Validate time format (HH:MM)\nconst timeRegex = /^\\d{2}:\\d{2}$/;\nif (!timeRegex.test(bookingData.time)) {\n  return {\n    success: false,\n    error: 'Invalid time format. Please use HH:MM',\n    bookingData: null\n  };\n}\n\n// Validate party size\nif (isNaN(bookingData.partySize) || bookingData.partySize < 1) {\n  return {\n    success: false,\n    error: 'Invalid party size. Must be a number greater than 0',\n    bookingData: null\n  };\n}\n\nreturn {\n  success: true,\n  error: null,\n  bookingData: bookingData\n};"
+      },
+      "id": "54ea32be-e18d-44ef-bd83-98a0179899fd",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3040,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "validation-success",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            },
+            {
+              "id": "2500dc60-1b39-487b-8d12-b977f6d557a7",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "e17ebe7f-bdae-4a74-a995-526e07c649cb",
+      "name": "Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2816,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Business hours validation for Indonesia timezone\nconst bookingData = $input.first().json.bookingData;\n\n// Parse date and time components\nconst [year, month, day] = bookingData.date.split('-').map(Number);\nconst [hour, minute] = bookingData.time.split(':').map(Number);\n\n// Create date object in Indonesia timezone (UTC+7)\n// Note: JavaScript Date constructor treats the date as local time when no timezone is specified\n// We need to account for Indonesia being UTC+7\nconst indonesiaTime = new Date(year, month - 1, day, hour, minute, 0);\n\n// Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)\nconst dayOfWeek = indonesiaTime.getDay();\nconst timeInMinutes = hour * 60 + minute;\n\n// Business hours: Mon-Fri (1-5), 8am-5pm (540-1260 minutes)\n// Excluding: 12-1pm (720-780 minutes), 6-8pm (1080-1200 minutes)\nconst isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;\nconst isWithinBusinessHours = timeInMinutes >= 480 && timeInMinutes <= 1020;\nconst isNotLunchBreak = !(timeInMinutes >= 720 && timeInMinutes <= 780);\nconst isNotDinnerBreak = !(timeInMinutes >= 1080 && timeInMinutes <= 1200);\n\n// Check if time is valid\nconst isValidTime = isWeekday && isWithinBusinessHours && isNotLunchBreak && isNotDinnerBreak;\n\n// Calculate end time (30 minutes later)\nlet endHour = hour;\nlet endMinute = minute + 30;\nif (endMinute >= 60) {\n  endHour += 1;\n  endMinute -= 60;\n}\n\n// Format the requested datetime for Google Calendar (in Indonesia timezone)\n// Create proper ISO string with Indonesia timezone offset\nconst startDateTime = new Date(year, month - 1, day, hour, minute, 0).toISOString().replace('Z', '+08:00');\nconst endDateTime = new Date(year, month - 1, day, endHour, endMinute, 0).toISOString().replace('Z', '+08:00');\n\n// Create proper ISO string with Indonesia timezone offset\nconst startDateTimeCal = new Date(year, month - 1, day, hour, minute, 0).toISOString().replace('Z', '+08:00').replace('.000', '');\nconst endDateTimeCal = new Date(year, month - 1, day, endHour, endMinute, 0).toISOString().replace('Z', '+08:00').replace('.000', '');\n\nlet errorMessage = '';\nif (!isWeekday) {\n  errorMessage = 'Sorry, we only accept bookings on weekdays (Monday to Friday).';\n} else if (!isWithinBusinessHours) {\n  errorMessage = 'Sorry, we only accept bookings between 9:00 AM and 9:00 PM Indonesia time.';\n} else if (!isNotLunchBreak) {\n  errorMessage = 'Sorry, we are closed for lunch from 12:00 PM to 2:00 PM Indonesia time.';\n} else if (!isNotDinnerBreak) {\n  errorMessage = 'Sorry, we are closed for dinner from 6:00 PM to 8:00 PM Indonesia time.';\n}\n\n\nreturn {\n  isValidTime: isValidTime,\n  errorMessage: errorMessage,\n  bookingData: bookingData,\n  startDateTimeCal: startDateTimeCal,\n  endDateTimeCal: endDateTimeCal,\n  startDateTime: startDateTime,\n  endDateTime: endDateTime,\n\n  \n  indonesiaTime: indonesiaTime.toLocaleString('en-MY', { timeZone: 'Asia/Jakarta' }),\n  dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek],\n  debug: {\n    parsedDate: bookingData.date,\n    parsedTime: bookingData.time,\n    dayOfWeek: dayOfWeek,\n    timeInMinutes: timeInMinutes,\n    isWeekday: isWeekday,\n    isWithinBusinessHours: isWithinBusinessHours,\n    isNotLunchBreak: isNotLunchBreak,\n    isNotDinnerBreak: isNotDinnerBreak\n  }\n};"
+      },
+      "id": "f9b00969-0b8e-41c7-aa79-50f4c22fa128",
+      "name": "Business Hours Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2592,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "time-valid",
+              "leftValue": "={{ $json.isValidTime }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            },
+            {
+              "id": "2ad109e2-afbf-4ac5-a850-c5e21ec7c8bf",
+              "leftValue": "={{ $json.isValidTime }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "fcec51d1-e421-46b0-9787-343004cd04ae",
+              "leftValue": "={{ $json.errorMessage }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "720efe6b-3520-4990-ab87-8a6a4fe8146d",
+      "name": "Time Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2368,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function checkCalendar(calendarEvents, bookingData,startDateTime,endDateTime){\n\n \n\n// Filter out events that might conflict\nconst conflictingEvents = calendarEvents.filter(event => {\n  const eventStart = new Date(event.json.start?.dateTime || event.json.start?.date);\n  const eventEnd = new Date(event.json.end?.dateTime || event.json.end?.date);\n  \n  // Check for overlap\n  return (eventStart < new Date(endDateTime) && eventEnd > new Date(startDateTime));\n});\n\nconst isAvailable = conflictingEvents.length === 0;\n\nlet availabilityMessage = '';\nif (!isAvailable) {\n  const conflictingTimes = conflictingEvents.map(event => {\n    const start = new Date(event.json.start?.dateTime || event.json.start?.date);\n    return start.toLocaleString('en-MY', { timeZone: 'Asia/Jakarta' });\n  }).join(', ');\n  \n  availabilityMessage = `Sorry, the requested time slot is not available. We have existing bookings at: ${conflictingTimes}. Please choose a different time.`;\n}\n\nreturn {\n  isAvailable: isAvailable,\n  availabilityMessage: availabilityMessage,\n  conflictingEvents: conflictingEvents,\n  bookingData: bookingData,\n  startDateTime: startDateTime,\n  endDateTime: endDateTime\n};\n\n  \n} \n\n\n// PUBLIC HOLIDAY\n// Check if there are any conflicting events \nlet calendarEvents = $input.all();\nlet bookingData =$('Time Validation Check').first().json.bookingData;\nlet startDateTime = $('Time Validation Check').first().json.startDateTime\nlet endDateTime =$('Time Validation Check').first().json.endDateTime\n \nconst result1 = checkCalendar(calendarEvents, bookingData,startDateTime,endDateTime)\nif(!result1.isAvailable   ){\n  return result1\n}\n\n \n// MAIN CALENDAR\n// Check if there are any conflicting events \n\nlet calendarEvents2 = $('Check Calendar Availability - Main').all(); \n\nconst result2 = checkCalendar(calendarEvents2, bookingData,startDateTime,endDateTime)\nif(!result2.isAvailable   ){\n  return result2\n}\n\n\n \nreturn {result2, result1:result1, result22:result2}\n "
+      },
+      "id": "3efa498c-ac72-4e67-8c4a-110703cdd83f",
+      "name": "Check Availability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "slot-available",
+              "leftValue": "={{ $json.isAvailable }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            },
+            {
+              "id": "a2aeaf3c-a4a9-46c7-957b-71a83b5b43d4",
+              "leftValue": "={{ $json.isAvailable +\"\"}}",
+              "rightValue": "\"true\"",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "71292758-80a6-4c61-b6ee-9dcb6df7fef7",
+              "leftValue": "={{ $json.conflictingEvents }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "array",
+                "operation": "lengthLt",
+                "rightType": "number"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "f59d2c4d-de33-482a-b04e-e1e305e7404d",
+      "name": "Availability Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1472,
+        1472
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "indraseptianto17@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Booking Restaurant Available"
+        },
+        "start": "={{ $('Business Hours Check').all()[0].json.startDateTimeCal }}",
+        "end": "={{ $('Business Hours Check').all()[0].json.endDateTimeCal }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Booking Webhook').first().json.body.email }}"
+          ],
+          "color": "2",
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "=✨ Data of users who made bookings :\n👤 Nama: {{ $json.result2.bookingData.name }}\n📧 Email: {{ $json.result2.bookingData.email }}\n📱 Phone: {{ $json.result2.bookingData.phone }}\n📅 Date: {{ $json.result2.bookingData.date }}\n⏰ Time: {{ $json.result2.bookingData.time }}\n👥 Party: {{ $json.result2.bookingData.partySize }}\n⚠️ Alergi: {{ $json.result2.bookingData.allergies }}\n📝 Special: {{ $json.result2.bookingData.specialRequests }}",
+          "guestsCanInviteOthers": false,
+          "summary": "=📝 Booking Restaurant : Booking with {{ $('Booking Webhook').first().json.body.name }}",
+          "visibility": "default"
+        }
+      },
+      "id": "2bf55494-3937-414c-af95-c39d79340861",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        1376
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZDrWJu38aJFLMMpJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst calendarEvent = $input.first().json;\n\nconst bookingData =$('Booking Webhook').first().json.body\n\nreturn {\n  success: true,\n  message: 'Booking confirmed successfully!',\n  bookingDetails: {\n    name: bookingData.name,\n    email: bookingData.email,\n    phone: bookingData.phone,\n    date: bookingData.date,\n    time: bookingData.time,\n    partySize: bookingData.partySize,\n    allergies: bookingData.allergies,\n    specialRequests: bookingData.specialRequests,\n    eventId: calendarEvent.id,\n    eventLink: calendarEvent.htmlLink,\n    calendarEvent: calendarEvent\n  },\n  confirmationMessage: `Hi ${bookingData.name}, your booking for ${bookingData.partySize} ${bookingData.partySize > 1 ? 'people' : 'person'} has been confirmed for ${bookingData.date} at ${bookingData.time} Indonesia time.${bookingData.allergies ? ` Allergies: ${bookingData.allergies}.` : ''}${bookingData.specialRequests ? ` Special requests: ${bookingData.specialRequests}.` : ''} You will receive a calendar invitation shortly.`\n};"
+      },
+      "id": "96a180b6-886b-434f-b420-117f5ed20986",
+      "name": "Prepare Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ebb44c89-ed88-45d9-8998-158bcc166c6a",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "8d5dfc75-1694-467c-b034-01fae86f018c",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "76155e12-de8b-4557-b7b5-3590201275fe",
+      "name": "Time Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "cfd7a032-fb4c-47ee-99b1-3eeb5f79ff0f",
+      "name": "Availability Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare error response for validation failures\nconst errorData = $input.first().json;\n\nreturn {\n  success: false,\n  error: errorData.error,\n  message: 'Booking request failed validation',\n  details: errorData\n};"
+      },
+      "id": "70bf3dd2-84d2-4d4b-affa-fc49de115b70",
+      "name": "Prepare Validation Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2592,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare error response for business hours violations\nconst errorData = $input.first().json;\n\nreturn {\n  success: false,\n  error: errorData.errorMessage,\n  message: 'Booking request outside business hours',\n  details: {\n    requestedTime: errorData.indonesiaTIme,\n    dayOfWeek: errorData.dayOfWeek,\n    businessHours: 'Monday to Friday, 9:00 AM - 9:00 PM Indonesia time',\n    excludedHours: '12:00 PM - 2:00 PM (lunch), 6:00 PM - 8:00 PM (dinner)'\n  }\n};"
+      },
+      "id": "e5c477e7-3d63-4253-ae1b-e914ebaeb77e",
+      "name": "Prepare Time Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2144,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare error response for availability issues\nconst errorData = $input.first().json;\n\nreturn {\n  success: false,\n  error: errorData.availabilityMessage,\n  message: 'Requested time slot is not available',\n  details: {\n    requestedTime: errorData.bookingData.date + ' ' + errorData.bookingData.time,\n    conflictingEvents: errorData.conflictingEvents.length,\n    suggestion: 'Please try a different time slot'\n  }\n};"
+      },
+      "id": "f511b6a2-9ef3-4972-bd87-6f72963fe567",
+      "name": "Prepare Availability Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1248,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "id.indonesian#holiday@group.v.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Hari libur di Indonesia"
+        },
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $('Business Hours Check').all()[0].json.startDateTime }}",
+          "timeMax": "={{ $('Business Hours Check').all()[0].json.endDateTime}}",
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
+      },
+      "id": "ba6db256-3d32-41e3-9f29-fead0d0ba4fd",
+      "name": "Check Calendar Availability - public holiday",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        1472
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZDrWJu38aJFLMMpJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "indraseptianto17@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Booking Restaurant Available"
+        },
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $('Business Hours Check').all()[0].json.startDateTime }}",
+          "timeMax": "={{ $('Business Hours Check').all()[0].json.endDateTime}}",
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
+      },
+      "id": "2f9e4621-cd65-4dc6-ac20-f876db5d98b8",
+      "name": "Check Calendar Availability - Main",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        -2144,
+        1472
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZDrWJu38aJFLMMpJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "indraseptianto17@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Booking Restaurant Available"
+        },
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $('Validate Date1').first().json.checkData.date + 'T00:00:00+08:00' }}",
+          "timeMax": "={{ $('Validate Date1').first().json.checkData.date + 'T23:59:59+08:00' }}",
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
+      },
+      "id": "064169d6-98bf-479c-93b4-1cc2f4a0e21e",
+      "name": "Check Calendar Availability",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        1152
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZDrWJu38aJFLMMpJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and validate incoming date data\nconst inputData = $('Booking Timeslot webhook').first().json.body;\n\n// Extract date information\nconst checkData = {\n  date: inputData.date || '',\n  timestamp: new Date().toISOString()\n};\n\n// Validate required fields\nif (!checkData.date) {\n  return {\n    success: false,\n    error: 'Missing required field: date',\n    checkData: null\n  };\n}\n\n// Validate date format (YYYY-MM-DD)\nconst dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\nif (!dateRegex.test(checkData.date)) {\n  return {\n    success: false,\n    error: 'Invalid date format. Please use YYYY-MM-DD',\n    checkData: null\n  };\n}\n\n// Parse date components\nconst [year, month, day] = checkData.date.split('-').map(Number);\nconst checkDate = new Date(year, month - 1, day);\nconst dayOfWeek = checkDate.getDay();\n\n// Check if it's a weekend\nconst isWeekend = dayOfWeek === 0 || dayOfWeek === 6;\n\nreturn {\n  success: true,\n  error: null,\n  checkData: checkData,\n  parsedDate: {\n    year: year,\n    month: month,\n    day: day,\n    dayOfWeek: dayOfWeek,\n    dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek],\n    isWeekend: isWeekend\n  }\n};"
+      },
+      "id": "3e8e5284-0fec-4ea7-ad18-b430576ce7d3",
+      "name": "Validate Date1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2816,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "book4",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "d06bfb4f-0268-4909-a4db-61b6b1018566",
+      "name": "Booking Timeslot webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3488,
+        1152
+      ],
+      "webhookId": "0a95e85e-cfa6-43d1-b8e0-466d133dcc15"
+    },
+    {
+      "parameters": {
+        "amount": 2.2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3264,
+        1664
+      ],
+      "id": "aa938e26-b757-4dd6-85ee-31ab2b92c145",
+      "name": "Wait",
+      "webhookId": "21195b92-9292-455a-9857-b290d0e0444a"
+    },
+    {
+      "parameters": {
+        "amount": 2.2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3264,
+        1152
+      ],
+      "id": "e5ef47b2-b4ed-4df6-9be5-14c74a65ad64",
+      "name": "Wait1",
+      "webhookId": "63efa930-e529-420a-b582-0df9c64b285b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3bfa3c4b-14c7-4c54-b186-bd4df7faafde",
+              "name": "configuredAvailableTimeSlots",
+              "value": "  [ { \"time\": '08:00', \"display\": '08:00 AM - 08:30 AM', \"available\": true }, { \"time\": '08:30', \"display\": '08:30 AM - 09:00 AM', \"available\": true },  { \"time\": '09:00', \"display\": '09:00 AM - 09:30 AM', \"available\": true },   { \"time\": '09:30', \"display\": '09:30 AM - 10:00 AM', \"available\": true },  { \"time\": '10:00', \"display\": '10:00 AM - 10:30 AM', \"available\": true },  { \"time\": '10:30', \"display\": '10:30 AM - 11:00 AM', \"available\": true }, { \"time\": '11:00', \"display\": '11:00 AM - 11:30 AM', \"available\": true },  { \"time\": '11:30', \"display\": '11:30 AM - 12:00 PM', \"available\": true },  { \"time\": '13:00', \"display\": '13:00 PM - 13:30 PM', \"available\": true },  { \"time\": '13:30', \"display\": '13:30 PM - 14:00 PM', \"available\": true }, { \"time\": '14:00', \"display\": '14:00 PM - 14:30 PM', \"available\": true }, { \"time\": '14:30', \"display\": '14:30 PM - 15:00 PM', \"available\": true }, { \"time\": '15:00', \"display\": '15:00 PM - 15:30 PM', \"available\": true }, { \"time\": '15:30', \"display\": '15:30 PM - 16:00 PM', \"available\": true }, { \"time\": '16:00', \"display\": '16:00 PM - 16:30 PM', \"available\": true },  { \"time\": '16:30', \"display\": '16:30 PM - 17:00 PM', \"available\": true }  ]  ",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3040,
+        1152
+      ],
+      "id": "edce1bff-3877-4173-aaf3-5c350b59561c",
+      "name": "ConfigTimeSlots"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "id.indonesian#holiday@group.v.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Hari libur di Indonesia"
+        },
+        "limit": 10,
+        "options": {
+          "timeMin": "={{ $json.checkData.date + 'T00:00:00+08:00' }}",
+          "timeMax": "={{ $json.checkData.date + 'T23:59:59+08:00' }}",
+          "singleEvents": true,
+          "orderBy": "startTime"
+        }
+      },
+      "id": "cbab7094-69ae-4d01-8384-770ba9235406",
+      "name": "Check Public Holiday Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        1152
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZDrWJu38aJFLMMpJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if the date is a public holiday and calendar conflicts\nconst holidayEvents = $('Check Public Holiday Calendar').all();\nconst calendarEvents = $('Check Calendar Availability').all();\nconst dateInfo = $('Validate Date1').first().json;\nconst configTimeSlots = $('ConfigTimeSlots').first().json.configuredAvailableTimeSlots\n\n// Check if there are any holiday events for this date\nconst isHoliday = holidayEvents && holidayEvents[0] && holidayEvents[0].json && holidayEvents[0].json.summary;\nlet holidayName = '';\nlet holidayMessage = '';\n\nif (isHoliday) {\n  // Get the first holiday event name\n  holidayName = holidayEvents[0].json.summary || 'Public Holiday';\n  holidayMessage = `This is a non-working day: ${holidayName}`;\n}\n\n// Check if it's a weekend\nconst isWeekend = dateInfo.parsedDate.isWeekend;\nlet weekendMessage = '';\n\nif (isWeekend) {\n  weekendMessage = `This is a weekend (${dateInfo.parsedDate.dayName})`;\n}\n\n// Determine if it's a working day\nconst isWorkingDay = !isHoliday && !isWeekend;\n\n// Generate available time slots for working days\nlet availableSlots = [];\nif (isWorkingDay) {\n  // Business hours: 9am-9pm, excluding 12-2pm and 6-8pm\n  const slots =  configTimeSlots ||[];\n  \n  // Check each slot against calendar events for conflicts\n  const selectedDate = dateInfo.checkData.date;\n  \n  slots.forEach(slot => {\n    // Create start and end times for this slot\n    const slotStartTime = `${selectedDate}T${slot.time}:00+08:00`;\n    const slotEndTime = `${selectedDate}T${String(parseInt(slot.time.split(':')[0]) + 1).padStart(2, '0')}:${slot.time.split(':')[1]}:00+08:00`;\n    \n    // Check if any calendar events conflict with this slot\n    const hasConflict = calendarEvents.some(event => {\n      const eventStart = new Date(event.json.start?.dateTime || event.json.start?.date);\n      const eventEnd = new Date(event.json.end?.dateTime || event.json.end?.date);\n      const slotStart = new Date(slotStartTime);\n      const slotEnd = new Date(slotEndTime);\n      \n      // Check for overlap\n      return (eventStart < slotEnd && eventEnd > slotStart);\n    });\n    \n    if (hasConflict) {\n      slot.available = false;\n      slot.status = 'booked';\n    }\n  });\n  \n  availableSlots = slots;\n}\n\nreturn {\n  success: true,\n  isWorkingDay: isWorkingDay,\n  isHoliday: isHoliday,\n  isWeekend: isWeekend,\n  holidayName: holidayName,\n  holidayMessage: holidayMessage,\n  weekendMessage: weekendMessage,\n  availableSlots: availableSlots,\n  dateInfo: dateInfo,\n  holidayEvents: holidayEvents,\n  calendarEvents: calendarEvents,\n  totalConflicts: calendarEvents.length\n};"
+      },
+      "id": "a1f8f52e-7e37-48ca-8671-8d8264433de4",
+      "name": "Process Holiday Check Calendar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2144,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c9d6944e-c269-4e6a-b192-1465e3a8de06",
+      "name": "Holiday Response Calendar",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "= \n\n\n<user-message>\n\n{{ $json.body.chat }}\n\n</user-message>",
+        "options": {
+          "systemMessage": "=Current timestamp datetime: {{   new Date().toLocaleString(\"en-MY\", {\n  timeZone: \"Asia/Jakarta\",\n  weekday: \"long\",\n  year: \"numeric\",\n  month: \"long\",\n  day: \"numeric\",\n  hour: \"2-digit\",\n  minute: \"2-digit\",\n  second: \"2-digit\",\n});\n }}\nYou are Booking Restaurant.\nYou must only respond to the <user-message> content.\nYou cannot process date earlier that current timestamp.\nYou are restricted to three specific actions, each mapped to one tool. If user ask anything outside of booking slots, mentioned sorry cannot do that , maybe next time\n\n1. Get current date time\nTool: TIMESTAMP_TOOL\n\n\n```\n Get current timestamp\n```\n\n\n2. Create a booking and must at least provide valid user email ,phone and name. Pay attention to the json input\nTool: CREATE_BOOKING_TOOL\n```\ncurl -X POST 'https://n8n.io/webhook-test/suarify-make-booking' \n-H 'Content-Type: application/json' -d '\n {\n    \"name\":\"Eden Rekno\",\n    \"email\":\"eden@example.com\",\n    \"phone\":\"+62823456789\",\n    \"date\":\"2025-09-17\",\n    \"time\":\"14:30\",\n    \"source\":\"Booking System\"\n}' \n```\n\n3. Check booking slots available for a particular date. Pay attention to the json input\nTool: GET_BOOKING_TOOL\n```\nexample user asked about 18sept2025 slots\n\ncurl -X POST 'https://n8n.io/webhook-test/suarify-check-booking-date' \n-H 'Content-Type: application/json' -d '\n{\n   date: \"2025-09-18\"\n}' \n```\n\n ",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -3088,
+        2096
+      ],
+      "id": "c8c6cd61-2d49-463b-af1e-fe6917b66f8d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct-0905",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3264,
+        2320
+      ],
+      "id": "d2682abf-b0f4-44df-a939-2006bae5ac7e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Hfs4oEHMbEL7Tqux",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.unique}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -3136,
+        2320
+      ],
+      "id": "4eb0f053-2f87-4c57-916f-685025ff6055",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat1",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3488,
+        2224
+      ],
+      "id": "0652b726-5ad1-4519-a14d-1aa0de7cb247",
+      "name": "chat Webhook",
+      "webhookId": "817e7022-2dfc-430b-acc9-09a00d9367ce",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2544,
+        2224
+      ],
+      "id": "d57a3649-e3ec-459d-8acc-566c4cdca199",
+      "name": "response chat Webhook",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to get current date and time.",
+        "jsCode": "// Example: convert the incoming query to uppercase and return it\nconst indonesiaTime = new Date().toLocaleString(\"en-ID\", {\n  timeZone: \"Asia/Jakarta\",\n  weekday: \"long\",\n  year: \"numeric\",\n  month: \"long\",\n  day: \"numeric\",\n  hour: \"2-digit\",\n  minute: \"2-digit\",\n  second: \"2-digit\",\n});\n\nconsole.log(\"indonesia Time:\", indonesiaTime);\nreturn  indonesiaTime"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -3008,
+        2320
+      ],
+      "id": "3a5e5a47-3f75-4c88-bf69-57d193deb337",
+      "name": "TIMESTAMP_TOOL"
+    },
+    {
+      "parameters": {
+        "toolDescription": "## Create a Booking :  MAKE A BOOKING ENDPOINT\n\n### Purpose \nThis workflow provides a webhook API endpoint that your frontend can easily integrate typically triggered by a submit button on a booking form.\nWhen the frontend calls this REST API, the workflow handles the booking logic by performing several key checks:\n- Valid Input — Ensures all required fields are present and correctly formatted.\n- Date & Time Validation — Confirms the requested slot falls within business hours, excludes lunch/dinner breaks, and respects public holidays.\n- Conflict Detection — Checks for any existing bookings at the requested time to prevent overlaps.\n- Calendar Integration — Once all checks pass, the workflow automatically creates a booking entry in your Google Calendar, keeping everything synced and visible.\n\n### Examples\n![Alt Text](https://raw.githubusercontent.com/dragonjump/suarify-booking/59a519ce4ebbaf58e4173c0914dce3ec617c44f8/demo-makebooking.gif)\n\n\n### How to integrate\n1. Connect your frontend interface to this api below. You may  change the base endpoint to `webhook` or `webhook-test` depending on your environment.\n\nYou can also change the based the endpoint 'https://n8n.io' to your own hosted domain like 'https://mycustomdomain.io/'\n\n```\ncurl -X POST 'https://n8n.io/webhook-test/suarify-make-booking' \n-H 'Content-Type: application/json' -d '\n {\n    \"name\":\"John Doe\",\n    \"email\":\"john@example.com\",\n    \"phone\":\"+60123456789\",\n    \"date\":\"2025-09-17\",\n    \"time\":\"14:30\",\n    \"source\":\"Booking System\"\n}' \n```\n\n2. You will see a sample output response:\n\n\n```\n{\n    \"success\": true,\n    \"message\": \"Booking confirmed successfully!\",\n    \"bookingDetails\": {\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\",\n        \"phone\": \"+60123456789\",\n        \"date\": \"2025-09-17\",\n        \"time\": \"14:30\",\n        \"eventId\": \"1sin1h9cp7dh779g3s4c15dbqo\",\n        \"eventLink\": \"https://www.google.com/calendar/event?eid=MXNbjFoOWNwN2RoNzc5ZzNzNGMxNWRicW8gZGI5OGJiMjhiNzcxNjU4ZjE3YzQzNzE2MzY2MGI2NzcyMTYzZThhYWE5NWIwMDI1OWMxZDFkNDA4M2YwNThjNkBn\",\n        \"calendarEvent\": { }\n    },\n    \"confirmationMessage\": \"Hi John Doe, your booking has been confirmed for 2025-09-17 at 14:30 Malaysia time. You will receive a calendar invitation shortly.\"\n}\n```",
+        "method": "POST",
+        "url": "https://template-n8n.b2cvzj.easypanel.host/webhook/https://template-n8n.b2cvzj.easypanel.host/webhook/bookingbaru",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON', ``, 'json') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -2880,
+        2320
+      ],
+      "id": "a601c689-caed-409b-ae1c-e8c9ec9893ac",
+      "name": "CREATE_BOOKING_TOOL"
+    },
+    {
+      "parameters": {
+        "toolDescription": "## Get Booking Slots :  FETCH BOOKING SLOTS ENDPOINT\n\n### Purpose \nThis workflow powers a REST API endpoint designed to respond when a user interacts with the frontend booking form and selects a specific date.\n\nUpon receiving the request, the endpoint returns a list of available time slots that can be booked. If the selected slot is already occupied, the system will mark the slot accordingly.\nIn cases where no slots for the entire day such as during public holidays, weekends, or scheduled closures — the response will clearly indicate that bookings are not possible on that day.\n\n\n\n### Examples\n![Alt Text](https://raw.githubusercontent.com/dragonjump/suarify-booking/59a519ce4ebbaf58e4173c0914dce3ec617c44f8/demo-timeslot.gif)\n\n\n### How to integrate\n1. Connect your frontend interface to this api below. You may  change the base endpoint to `webhook` or `webhook-test` depending on your environment.\n\nYou can also change the based the endpoint 'https://n8n.io' to your own hosted domain like 'https://mycustomdomain.io/'\n\n```\ncurl -X POST 'https://n8n.io/webhook-test/suarify-check-booking-date' \n-H 'Content-Type: application/json' -d '\n{\n   date: \"2025-09-18\"\n}' \n```\n\n2. You will see a sample output response:\n\n\n```\n{\n    \"success\": true,\n    \"isWorkingDay\": true,\n    \"isWeekend\": false,\n    \"holidayName\": \"\",\n    \"holidayMessage\": \"\",\n    \"weekendMessage\": \"\",\n    \"availableSlots\": [\n        {\n            \"time\": \"09:30\",\n            \"display\": \"9:30 AM - 10:30 AM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"10:30\",\n            \"display\": \"10:30 AM - 11:30 AM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"11:30\",\n            \"display\": \"11:30 AM - 12:30 PM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"11:30\",\n            \"display\": \"12:30 AM - 2:30 PM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"14:30\",\n            \"display\": \"2:30 PM - 3:30 PM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"15:30\",\n            \"display\": \"3:30 PM - 4:30 PM\",\n            \"available\": true\n        },\n        {\n            \"time\": \"16:30\",\n            \"display\": \"4:30 PM - 5:30 PM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        },\n        {\n            \"time\": \"17:30\",\n            \"display\": \"5:30 PM - 6:30 PM\",\n            \"available\": true\n        },\n        {\n            \"time\": \"17:30\",\n            \"display\": \"6:30 PM - 8:30 PM\",\n            \"available\": false\n        },\n        {\n            \"time\": \"20:30\",\n            \"display\": \"8:30 PM - 9:30 PM\",\n            \"available\": false,\n            \"status\": \"booked\"\n        }\n    ],\n    \"dateInfo\": {\n        \"success\": true,\n        \"error\": null,\n        \"checkData\": {\n            \"date\": \"2025-09-18\",\n            \"timestamp\": \"2025-09-16T06:58:56.210Z\"\n        },\n        \"parsedDate\": {\n            \"year\": 2025,\n            \"month\": 9,\n            \"day\": 18,\n            \"dayOfWeek\": 4,\n            \"dayName\": \"Thursday\",\n            \"isWeekend\": false\n        }\n    },\n    \"holidayEvents\": [],\n    \"calendarEvents\": [  ],\n    \"totalConflicts\": 6\n}\n```",
+        "method": "POST",
+        "url": "https://template-n8n.b2cvzj.easypanel.host/webhook/bookinghari",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "date",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -2752,
+        2320
+      ],
+      "id": "221502bb-52a2-405a-98af-5f029e8219bd",
+      "name": "GET_BOOKING_TOOL"
+    },
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. name + email validation\n2. phone validation\n3. date time validation",
+        "height": 304,
+        "width": 384,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        2160
+      ],
+      "typeVersion": 1,
+      "id": "32b386a3-06f6-489f-bb28-aeb276c94c18",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. datetime is weekend \n2. datetime is non-business hours \n3. datetime is lunch or dinner hours",
+        "height": 288,
+        "width": 400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        2128
+      ],
+      "typeVersion": 1,
+      "id": "ff306b3c-ec03-44f6-852f-df661b4ab310",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Handle validation \n1. datetime is conflicting with  another event\n2. datetime is a indonesia public holiday ",
+        "height": 304,
+        "width": 320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        1696
+      ],
+      "typeVersion": 1,
+      "id": "cadea7a9-a22e-4289-87ff-c2109e802282",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## Checking datetime  \n1. Malaysian public holiday\n2. Event booking conflict",
+        "height": 736,
+        "width": 1120,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        816
+      ],
+      "typeVersion": 1,
+      "id": "f12e144e-30ef-4f73-94ba-3812e8873d98",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "## Checking datetime  \n1. is a weekend working day?\n2. is a non-business hours?\n3. is a lunch or dinner hours?",
+        "height": 736,
+        "width": 864,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5312,
+        1920
+      ],
+      "typeVersion": 1,
+      "id": "d861dd28-34bd-44f2-961b-d1dd674ded53",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Checking input received\n1. is a valid name, email?\n2. is a valid phone number?\n3. is a valid date time?",
+        "height": 736,
+        "width": 816,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5232,
+        2672
+      ],
+      "typeVersion": 1,
+      "id": "abfe66db-f83b-4de7-af94-e4c7fb38a92b",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "## Creating the calendar entry\n ",
+        "height": 720,
+        "width": 560,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        2816
+      ],
+      "typeVersion": 1,
+      "id": "f9cbdcb3-6cab-4f1e-87bd-560f4e3be6dc",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for making a booking\nReceives the input name,email,phone and datetime for booking",
+        "height": 736,
+        "width": 400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5136,
+        1152
+      ],
+      "typeVersion": 1,
+      "id": "1c9922c2-8c4d-4f00-aab0-9d7b2342544d",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for getting booking slots by specific date\nReceives the timeslots for booking",
+        "height": 416,
+        "width": 1712,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        1760
+      ],
+      "typeVersion": 1,
+      "id": "32aacbf8-ea3e-45c1-9782-e78568efc283",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "## Endpoint for chatting with ai agent\nDo the 2 above operations but with a chatbot",
+        "height": 576,
+        "width": 1552,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        3040
+      ],
+      "typeVersion": 1,
+      "id": "af2f23e2-d406-445c-92a3-0c793a8c306d",
+      "name": "Sticky Note21"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Booking Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Business Hours Check",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Hours Check": {
+      "main": [
+        [
+          {
+            "node": "Time Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Time Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Check Calendar Availability - Main",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Time Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Availability": {
+      "main": [
+        [
+          {
+            "node": "Availability Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Availability Check": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Availability Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Response": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Validation Error": {
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Time Error": {
+      "main": [
+        [
+          {
+            "node": "Time Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Availability Error": {
+      "main": [
+        [
+          {
+            "node": "Availability Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Calendar Availability - public holiday": {
+      "main": [
+        [
+          {
+            "node": "Check Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Calendar Availability - Main": {
+      "main": [
+        [
+          {
+            "node": "Check Calendar Availability - public holiday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Calendar Availability": {
+      "main": [
+        [
+          {
+            "node": "Process Holiday Check Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Date1": {
+      "main": [
+        [
+          {
+            "node": "Check Public Holiday Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Timeslot webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "ConfigTimeSlots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConfigTimeSlots": {
+      "main": [
+        [
+          {
+            "node": "Validate Date1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Public Holiday Calendar": {
+      "main": [
+        [
+          {
+            "node": "Check Calendar Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Holiday Check Calendar": {
+      "main": [
+        [
+          {
+            "node": "Holiday Response Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "response chat Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "response chat Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TIMESTAMP_TOOL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CREATE_BOOKING_TOOL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_BOOKING_TOOL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2d94ae51-0570-4a36-8b83-a48ffb869c26",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fde19919a31ed58e61c45647a020de7382dc4aca690954c51a2aef1086764da7"
+  },
+  "id": "wivPdCgAPOYZB4zJ",
+  "tags": [
+    {
+      "updatedAt": "2025-11-26T15:04:19.814Z",
+      "createdAt": "2025-11-26T15:04:19.814Z",
+      "id": "orDKBPWBYCqESzn0",
+      "name": "Finall"
+    }
+  ]
+}

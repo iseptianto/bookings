@@ -7,8 +7,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQZHXLlvWZOJyj7Yy7tcenmpD1ypASozpmTE/iPtmFIB46ZmdtAc9eNBvH0H+Zpisbw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- ✅ TAMBAHAN: Vapi Web SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js"></script>
+    <!-- ✅ PERBAIKAN: Load Vapi SDK dengan defer -->
+    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js" defer></script>
+    
     
     <style>
         /* [SEMUA CSS TETAP SAMA - TIDAK ADA PERUBAHAN] */
@@ -953,7 +954,12 @@
 
         // ✅ NEW: Initialize Vapi SDK
         function initializeVapi() {
-            // Vapi will be initialized when button is clicked for the first time
+            if (typeof Vapi === 'undefined') {
+            console.warn('⚠️ Vapi SDK not loaded yet. Will retry...');
+            // Retry after 1 second
+            setTimeout(initializeVapi, 1000);
+                return;
+            }
             console.log('✅ Vapi SDK loaded and ready');
         }
 
@@ -1017,8 +1023,25 @@
         }
 
         // ✅ NEW: Start voice call
+// ✅ UPDATED: Start voice call with proper error handling
         async function startVoiceCall() {
             try {
+                // Check if Vapi SDK is loaded
+                if (typeof Vapi === 'undefined') {
+                    showToast('Voice SDK is still loading. Please wait...', 'warning');
+                    
+                    // Wait for SDK to load (max 5 seconds)
+                    let retries = 0;
+                    while (typeof Vapi === 'undefined' && retries < 10) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        retries++;
+                    }
+                    
+                    if (typeof Vapi === 'undefined') {
+                        throw new Error('Voice SDK failed to load. Please refresh the page.');
+                    }
+                }
+                
                 showToast('Connecting to voice assistant...', 'warning');
                 
                 // Get Vapi config from n8n
@@ -1034,33 +1057,58 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Failed to get voice config`);
+                    throw new Error(`HTTP ${response.status}: Failed to get voice config from n8n`);
                 }
 
                 const config = await response.json();
-                console.log('Voice config received:', config);
+                console.log('✅ Voice config received:', config);
 
-                if (config.success && config.publicKey && config.assistantId) {
-                    // Initialize Vapi if not already done
-                    if (!vapiInstance) {
-                        vapiInstance = new Vapi(config.publicKey);
-                        setupVapiEvents();
-                    }
-
-                    // Start the call with assistant ID from config
-                    await vapiInstance.start(config.assistantId);
-                    
-                } else {
-                    throw new Error(config.error || 'Invalid voice configuration received');
+                // Validate config
+                if (!config.success) {
+                    throw new Error(config.error || 'Failed to get voice configuration');
                 }
 
+                if (!config.publicKey) {
+                    throw new Error('Missing publicKey in n8n response');
+                }
+
+                if (!config.assistantId) {
+                    throw new Error('Missing assistantId in n8n response');
+                }
+
+                // Initialize Vapi if not already done
+                if (!vapiInstance) {
+                    console.log('🔧 Initializing Vapi with key:', config.publicKey.substring(0, 10) + '...');
+                    vapiInstance = new Vapi(config.publicKey);
+                    setupVapiEvents();
+                }
+
+                // Start the call with assistant ID from config
+                console.log('📞 Starting call with assistant:', config.assistantId);
+                await vapiInstance.start(config.assistantId);
+                
             } catch (error) {
                 console.error('❌ Voice call error:', error);
-                showToast('Failed to start call: ' + error.message, 'error');
+                
+                // User-friendly error messages
+                let errorMessage = 'Failed to start call';
+                
+                if (error.message.includes('Vapi')) {
+                    errorMessage = 'Voice SDK not loaded. Please refresh the page.';
+                } else if (error.message.includes('HTTP')) {
+                    errorMessage = 'Cannot connect to server. Check your n8n webhook.';
+                } else if (error.message.includes('publicKey')) {
+                    errorMessage = 'Voice configuration error. Check n8n workflow.';
+                } else {
+                    errorMessage = error.message;
+                }
+                
+                showToast(errorMessage, 'error');
                 isCallActive = false;
                 updateCallUI(false);
             }
         }
+
 
         // ✅ NEW: Stop voice call
         function stopVoiceCall() {

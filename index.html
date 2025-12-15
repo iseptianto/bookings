@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOKING RESTAURANT</title>
+    
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQZHXLlvWZOJyj7Yy7tcenmpD1ypASozpmTE/iPtmFIB46ZmdtAc9eNBvH0H+Zpisbw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQZHXLlvWZOJyj7Yy7tcenmpD1ypASozpmTE/iPtmFIB46ZmdtAc9eNBvH0H/Zpisbw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- ✅ PERBAIKAN: Load Vapi SDK dengan defer -->
-    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js" defer></script>
-    
+    <!-- ✅ Vapi Web SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js"></script>
     
     <style>
-        /* [SEMUA CSS TETAP SAMA - TIDAK ADA PERUBAHAN] */
         * {
             margin: 0;
             padding: 0;
@@ -670,7 +669,7 @@
             color: #6b7280;
         }
 
-        /* ✅ UPDATED: Floating Call Button dengan status indicators */
+        /* ✅ Floating Call Button with status indicators */
         .floating-call-btn {
             position: fixed;
             bottom: 20px;
@@ -699,7 +698,7 @@
             transform: scale(0.95);
         }
 
-        /* ✅ NEW: Call active state */
+        /* ✅ Call active state */
         .floating-call-btn.calling {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             animation: pulse 1.5s infinite;
@@ -716,7 +715,7 @@
             }
         }
 
-        /* ✅ NEW: Call status indicator */
+        /* ✅ Call status indicator */
         .call-status {
             position: fixed;
             bottom: 90px;
@@ -768,7 +767,7 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-utensils"></i> Booking Restaurant</h1>
-            <p>Welcome to our Table Reservation service. Here, you can book a table for a dinner, birthday celebration, or any other special event.Simply enter your name, email, and other details, and all confirmations will be automatically saved to your Google Calendar.If you need further assistance, feel free to contact us via WhatsApp.</p>
+            <p>Welcome to our Table Reservation service. Here, you can book a table for a dinner, birthday celebration, or any other special event. Simply enter your name, email, and other details, and all confirmations will be automatically saved to your Google Calendar. If you need further assistance, feel free to contact us via WhatsApp.</p>
         </div>
 
         <div class="form-container">
@@ -891,7 +890,7 @@
         </div>
     </div>
 
-    <!-- ✅ NEW: Call Status Indicator -->
+    <!-- ✅ Call Status Indicator -->
     <div class="call-status" id="call-status">
         <div class="indicator"></div>
         <span id="status-text">Connected</span>
@@ -903,12 +902,33 @@
     </button>
 
     <script>
+        // ===== VAPI SDK LOADER (CRITICAL - MUST BE FIRST) =====
+        (function() {
+            let vapiLoadAttempts = 0;
+            const maxAttempts = 100; // 10 seconds total
+            
+            const checkVapiInterval = setInterval(function() {
+                vapiLoadAttempts++;
+                
+                if (typeof Vapi !== 'undefined') {
+                    console.log('✅ Vapi SDK loaded successfully');
+                    window.vapiSDKReady = true;
+                    clearInterval(checkVapiInterval);
+                    
+                    // Dispatch custom event
+                    window.dispatchEvent(new Event('vapiReady'));
+                } else if (vapiLoadAttempts >= maxAttempts) {
+                    console.error('❌ Vapi SDK failed to load after 10 seconds');
+                    window.vapiSDKReady = false;
+                    clearInterval(checkVapiInterval);
+                }
+            }, 100);
+        })();
+
         // ===== WEBHOOK URLs =====
         const MAIN_URL_MAKE_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/book2';
         const MAIN_URL_CHECK_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/book4';
         const MAIN_URL_CHAT_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/chat-booking';
-        
-        // ✅ NEW: Voice booking webhooks
         const MAIN_URL_VOICE_INIT = 'https://template-n8n.b2cvzj.easypanel.host/webhook/voice-booking-init';
         const MAIN_URL_VOICE_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/voice-booking2';
 
@@ -927,49 +947,68 @@
             }
         }
 
-        // Apply theme on page load
         checkTheme();
 
-        // Global variables
+        // ===== GLOBAL VARIABLES =====
         let selectedTimeSlot = null;
         let availableSlots = [];
         let bookedSlots = [];
         let chatMode = false;
         let chatSessionId = null;
 
-        // ✅ NEW: Voice AI variables
+        // ✅ Voice AI variables
         let vapiInstance = null;
         let isCallActive = false;
         let callStartTime = null;
+        window.vapiSDKReady = false;
 
         // Generate unique session ID
         function generateSessionId() {
-            return Date.now().toString();
+            return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
 
         // Initialize chat session
         function initChatSession() {
             chatSessionId = generateSessionId();
+            console.log('📝 Chat session initialized:', chatSessionId);
         }
 
-        // ✅ NEW: Initialize Vapi SDK
-        function initializeVapi() {
-            if (typeof Vapi === 'undefined') {
-            console.warn('⚠️ Vapi SDK not loaded yet. Will retry...');
-            // Retry after 1 second
-            setTimeout(initializeVapi, 1000);
+        // ===== VOICE AI FUNCTIONS =====
+
+        // ✅ Wait for Vapi SDK to be ready
+        async function waitForVapiSDK(maxWaitMs = 10000) {
+            const startTime = Date.now();
+            
+            return new Promise((resolve, reject) => {
+                if (typeof Vapi !== 'undefined') {
+                    resolve(true);
+                    return;
+                }
+                
+                const checkInterval = setInterval(() => {
+                    if (typeof Vapi !== 'undefined') {
+                        clearInterval(checkInterval);
+                        resolve(true);
+                    } else if (Date.now() - startTime > maxWaitMs) {
+                        clearInterval(checkInterval);
+                        reject(new Error('Vapi SDK failed to load within timeout'));
+                    }
+                }, 100);
+            });
+        }
+
+        // ✅ Setup Vapi event listeners
+        function setupVapiEvents() {
+            if (!vapiInstance) {
+                console.warn('⚠️ Cannot setup events: vapiInstance is null');
                 return;
             }
-            console.log('✅ Vapi SDK loaded and ready');
-        }
 
-        // ✅ NEW: Setup Vapi event listeners
-        function setupVapiEvents() {
-            if (!vapiInstance) return;
+            console.log('🔧 Setting up Vapi event listeners...');
 
             // Call started
             vapiInstance.on('call-start', () => {
-                console.log('✅ Call started');
+                console.log('✅ Voice call started');
                 isCallActive = true;
                 callStartTime = Date.now();
                 updateCallUI(true);
@@ -978,8 +1017,9 @@
 
             // Call ended
             vapiInstance.on('call-end', () => {
-                console.log('📞 Call ended');
+                console.log('📞 Voice call ended');
                 isCallActive = false;
+                
                 const duration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
                 updateCallUI(false);
                 showToast(`Call ended (${duration}s). Thank you!`, 'success');
@@ -988,22 +1028,28 @@
 
             // Speech start (user started speaking)
             vapiInstance.on('speech-start', () => {
-                console.log('🎤 User speaking');
+                console.log('🎤 User started speaking');
                 const statusEl = document.getElementById('call-status');
                 const textEl = document.getElementById('status-text');
-                statusEl.classList.remove('listening');
-                statusEl.classList.add('speaking');
-                textEl.textContent = 'Listening...';
+                
+                if (statusEl && textEl) {
+                    statusEl.classList.remove('listening');
+                    statusEl.classList.add('speaking');
+                    textEl.textContent = 'Listening...';
+                }
             });
 
             // Speech end (user stopped speaking)
             vapiInstance.on('speech-end', () => {
-                console.log('🤐 User stopped');
+                console.log('🤐 User stopped speaking');
                 const statusEl = document.getElementById('call-status');
                 const textEl = document.getElementById('status-text');
-                statusEl.classList.remove('speaking');
-                statusEl.classList.add('listening');
-                textEl.textContent = 'Processing...';
+                
+                if (statusEl && textEl) {
+                    statusEl.classList.remove('speaking');
+                    statusEl.classList.add('listening');
+                    textEl.textContent = 'Processing...';
+                }
             });
 
             // Error handling
@@ -1022,29 +1068,24 @@
             console.log('✅ Vapi event listeners configured');
         }
 
-        // ✅ NEW: Start voice call
-// ✅ UPDATED: Start voice call with proper error handling
+        // ✅ Start voice call
         async function startVoiceCall() {
             try {
-                // Check if Vapi SDK is loaded
-                if (typeof Vapi === 'undefined') {
-                    showToast('Voice SDK is still loading. Please wait...', 'warning');
-                    
-                    // Wait for SDK to load (max 5 seconds)
-                    let retries = 0;
-                    while (typeof Vapi === 'undefined' && retries < 10) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        retries++;
-                    }
-                    
-                    if (typeof Vapi === 'undefined') {
-                        throw new Error('Voice SDK failed to load. Please refresh the page.');
-                    }
+                console.log('🎙️ Starting voice call...');
+                showToast('Initializing voice assistant...', 'warning');
+                
+                // Step 1: Wait for Vapi SDK to be loaded
+                try {
+                    await waitForVapiSDK(10000);
+                    console.log('✅ Vapi SDK confirmed loaded');
+                } catch (error) {
+                    throw new Error('Vapi SDK not loaded. Please refresh the page and try again.');
                 }
                 
                 showToast('Connecting to voice assistant...', 'warning');
                 
-                // Get Vapi config from n8n
+                // Step 2: Get Vapi config from n8n
+                console.log('📡 Fetching voice config from n8n...');
                 const response = await fetch(MAIN_URL_VOICE_INIT, {
                     method: 'POST',
                     headers: {
@@ -1052,55 +1093,64 @@
                     },
                     body: JSON.stringify({
                         sessionId: chatSessionId || generateSessionId(),
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        source: 'web'
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Failed to get voice config from n8n`);
+                    throw new Error(`HTTP ${response.status}: Failed to connect to n8n webhook. Check if webhook is active.`);
                 }
 
                 const config = await response.json();
-                console.log('✅ Voice config received:', config);
+                console.log('✅ Voice config received:', {
+                    success: config.success,
+                    hasPublicKey: !!config.publicKey,
+                    hasAssistantId: !!config.assistantId
+                });
 
-                // Validate config
+                // Step 3: Validate config
                 if (!config.success) {
-                    throw new Error(config.error || 'Failed to get voice configuration');
+                    throw new Error(config.error || 'Failed to get voice configuration from n8n');
                 }
 
                 if (!config.publicKey) {
-                    throw new Error('Missing publicKey in n8n response');
+                    throw new Error('Missing publicKey in n8n response. Check webhook configuration.');
                 }
 
                 if (!config.assistantId) {
-                    throw new Error('Missing assistantId in n8n response');
+                    throw new Error('Missing assistantId in n8n response. Check webhook configuration.');
                 }
 
-                // Initialize Vapi if not already done
+                // Step 4: Initialize Vapi if not already done
                 if (!vapiInstance) {
-                    console.log('🔧 Initializing Vapi with key:', config.publicKey.substring(0, 10) + '...');
+                    console.log('🔧 Initializing Vapi with public key...');
                     vapiInstance = new Vapi(config.publicKey);
                     setupVapiEvents();
+                    console.log('✅ Vapi instance created');
                 }
 
-                // Start the call with assistant ID from config
+                // Step 5: Start the call
                 console.log('📞 Starting call with assistant:', config.assistantId);
                 await vapiInstance.start(config.assistantId);
+                console.log('✅ Call start initiated');
                 
             } catch (error) {
                 console.error('❌ Voice call error:', error);
                 
                 // User-friendly error messages
-                let errorMessage = 'Failed to start call';
+                let errorMessage = 'Failed to start call: ';
                 
-                if (error.message.includes('Vapi')) {
-                    errorMessage = 'Voice SDK not loaded. Please refresh the page.';
-                } else if (error.message.includes('HTTP')) {
-                    errorMessage = 'Cannot connect to server. Check your n8n webhook.';
-                } else if (error.message.includes('publicKey')) {
-                    errorMessage = 'Voice configuration error. Check n8n workflow.';
+                if (error.message.includes('Vapi SDK')) {
+                    errorMessage = '❌ Voice SDK not loaded. Please refresh the page.';
+                } else if (error.message.includes('HTTP') || error.message.includes('webhook')) {
+                    errorMessage = '❌ Cannot connect to server. Check if n8n webhook is active.';
+                } else if (error.message.includes('publicKey') || error.message.includes('assistantId')) {
+                    errorMessage = '❌ Configuration error. Check n8n webhook response format.';
+                } else if (error.message.includes('microphone') || error.message.includes('permission')) {
+                    errorMessage = '❌ Microphone access denied. Please allow microphone permission.';
                 } else {
-                    errorMessage = error.message;
+                    errorMessage = '❌ ' + error.message;
                 }
                 
                 showToast(errorMessage, 'error');
@@ -1109,17 +1159,21 @@
             }
         }
 
-
-        // ✅ NEW: Stop voice call
+        // ✅ Stop voice call
         function stopVoiceCall() {
             if (vapiInstance && isCallActive) {
+                console.log('🛑 Stopping voice call...');
                 vapiInstance.stop();
                 showToast('Ending call...', 'warning');
+            } else {
+                console.warn('⚠️ Cannot stop: No active call');
             }
         }
 
-        // ✅ NEW: Toggle voice call (start/stop)
+        // ✅ Toggle voice call (start/stop)
         function toggleVoiceCall() {
+            console.log('🔄 Toggle voice call. Current state:', isCallActive ? 'active' : 'inactive');
+            
             if (!isCallActive) {
                 startVoiceCall();
             } else {
@@ -1127,50 +1181,49 @@
             }
         }
 
-        // ✅ NEW: Update UI based on call status
+        // ✅ Update UI based on call status
         function updateCallUI(active) {
             const btn = document.getElementById('voice-call-btn');
             const icon = document.getElementById('call-icon');
             const status = document.getElementById('call-status');
+            
+            if (!btn || !icon || !status) {
+                console.warn('⚠️ UI elements not found');
+                return;
+            }
             
             if (active) {
                 btn.classList.add('calling');
                 icon.className = 'fas fa-phone-slash';
                 status.classList.add('active', 'listening');
                 document.getElementById('status-text').textContent = 'Connected';
+                console.log('🟢 UI updated: Call active');
             } else {
                 btn.classList.remove('calling');
                 icon.className = 'fas fa-phone';
                 status.classList.remove('active', 'listening', 'speaking');
+                console.log('🔴 UI updated: Call inactive');
             }
         }
 
+        // ===== OTHER FUNCTIONS (Form, Chat, etc.) =====
+
         // Markdown to HTML converter
         function markdownToHtml(markdown) {
-            // Convert markdown to HTML
             return markdown
-                // Headers
                 .replace(/### (.*?)$/gm, '<h3>$1</h3>')
                 .replace(/## (.*?)$/gm, '<h2>$1</h2>')
                 .replace(/# (.*?)$/gm, '<h1>$1</h1>')
-                // Bold
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                // Links
                 .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-                // Line breaks
                 .replace(/\n/g, '<br>')
                 .replace(/<br><br>/g, '</p><p>')
-                // Wrap in paragraphs
                 .replace(/^(.+)$/gm, '<p>$1</p>')
-                // Clean up empty paragraphs
                 .replace(/<p><\/p>/g, '')
-                // Fix headers inside paragraphs
                 .replace(/<p>(<h[1-3]>.*?<\/h[1-3]>)<\/p>/g, '$1')
-                // Fix lists
                 .replace(/- (.*?)<br>/g, '<li>$1</li>')
                 .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
                 .replace(/<\/ul><br><ul>/g, '')
-                // Emojis and icons
                 .replace(/✓/g, '✅')
                 .replace(/✗/g, '❌')
                 .replace(/→/g, '➡️')
@@ -1192,7 +1245,6 @@
             const testScenarios = document.querySelector('.test-scenarios');
 
             if (chatMode) {
-                // Switch to chat mode
                 toggle.classList.add('active');
                 formLabel.classList.remove('active');
                 chatLabel.classList.add('active');
@@ -1201,12 +1253,10 @@
                 businessHours.style.display = 'none';
                 if (testScenarios) testScenarios.style.display = 'none';
 
-                // Initialize chat session if not already done
                 if (!chatSessionId) {
                     initChatSession();
                 }
             } else {
-                // Switch to form mode
                 toggle.classList.remove('active');
                 formLabel.classList.add('active');
                 chatLabel.classList.remove('active');
@@ -1240,7 +1290,6 @@
             messageDiv.appendChild(bubble);
             chatMessages.appendChild(messageDiv);
 
-            // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
@@ -1263,13 +1312,9 @@
         async function sendChatMessage(message) {
             if (!message.trim()) return;
 
-            // Add user message
             addChatMessage(message, true);
-
-            // Show typing indicator
             showTypingIndicator();
 
-            // Disable send button
             const sendBtn = document.getElementById('chat-send-btn');
             sendBtn.disabled = true;
 
@@ -1288,25 +1333,18 @@
                 const data = await response.json();
                 console.log('Chat response:', data);
 
-                // Hide typing indicator
                 hideTypingIndicator();
 
-                // Handle different response formats
                 let botMessage;
                 if (typeof data === 'string') {
-                    // Plain text string response
                     botMessage = data;
                 } else if (Array.isArray(data) && data.length > 0 && data[0].output) {
-                    // Array format with output property
                     botMessage = data[0].output;
                 } else if (typeof data === 'object' && data.output) {
-                    // Object format with output property
                     botMessage = data.output;
                 } else if (typeof data === 'object' && data.message) {
-                    // Object format with message property
                     botMessage = data.message;
                 } else {
-                    // Fallback error message
                     botMessage = "Sorry, I encountered an error. Please try again.";
                 }
 
@@ -1317,7 +1355,6 @@
                 hideTypingIndicator();
                 addChatMessage("Sorry, I encountered an error. Please try again.", false);
             } finally {
-                // Re-enable send button
                 sendBtn.disabled = false;
             }
         }
@@ -1404,7 +1441,6 @@
             document.getElementById('allergies').value = data.allergies;
             document.getElementById('notes').value = data.specialRequests;
 
-            // Trigger date change to load time slots
             if (data.date) {
                 checkDateAndLoadSlots(data.date);
             }
@@ -1417,10 +1453,8 @@
 
             document.body.appendChild(toast);
 
-            // Show toast
             setTimeout(() => toast.classList.add('show'), 100);
 
-            // Hide toast after 5 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => document.body.removeChild(toast), 300);
@@ -1431,7 +1465,6 @@
             const timeSlotsGrid = document.getElementById('time-slots-grid');
             const submitBtn = document.getElementById('submit-btn');
 
-            // Check if date is earlier than today
             const today = new Date();
             const selectedDate = new Date(date);
             today.setHours(0, 0, 0, 0);
@@ -1443,11 +1476,9 @@
                 return;
             }
 
-            // Show loading state
             timeSlotsGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Loading time slots...</div>';
             submitBtn.disabled = true;
 
-            // Check for holidays and get available slots
             fetch(MAIN_URL_CHECK_BOOKING, {
                 method: 'POST',
                 headers: {
@@ -1457,22 +1488,19 @@
             })
             .then(response => {
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
                 return response.text();
             })
             .then(text => {
                 console.log('Response text:', text);
 
                 if (!text || text.trim() === '') {
-                    console.error('Empty response from server. Check if n8n workflow is active.');
-                    throw new Error('Server returned empty response. Please check if the n8n workflow is active and the webhook URL is correct.');
+                    throw new Error('Server returned empty response');
                 }
 
                 try {
                     return JSON.parse(text);
                 } catch (e) {
                     console.error('Failed to parse JSON:', e);
-                    console.error('Response was:', text);
                     throw new Error('Invalid JSON response from server');
                 }
             })
@@ -1492,7 +1520,6 @@
                         return;
                     }
 
-                    // Load available time slots
                     availableSlots = data.availableSlots;
                     loadTimeSlots(availableSlots);
                 } else {
@@ -1539,13 +1566,9 @@
         }
 
         function selectTimeSlot(element, time) {
-            // Remove previous selection
             document.querySelectorAll('.time-slot.selected').forEach(el => el.classList.remove('selected'));
-
-            // Add selection to clicked element
             element.classList.add('selected');
             selectedTimeSlot = time;
-
             console.log('Selected time slot:', time);
         }
 
@@ -1554,7 +1577,7 @@
             const selectedDate = e.target.value;
             if (selectedDate) {
                 checkDateAndLoadSlots(selectedDate);
-                selectedTimeSlot = null; // Reset selected slot
+                selectedTimeSlot = null;
             }
         });
 
@@ -1598,15 +1621,10 @@
                 if (data.success) {
                     showToast(data.confirmationMessage || 'Booking confirmed!', 'success');
 
-                    // Check if in iframe mode and send signal to parent
                     const urlParams = new URLSearchParams(window.location.search);
                     const iframeMode = urlParams.get('iframeMode');
-                    console.log('iframeMode:', iframeMode);
-                    console.log('window.parent !== window:', window.parent !== window);
 
                     if (iframeMode === 'true') {
-                        // Send signal to parent window to close modal
-                        console.log('Sending message to parent...');
                         window.parent.postMessage({
                             type: 'booking-submitted',
                             success: true,
@@ -1614,7 +1632,6 @@
                         }, '*');
                     }
 
-                    // Reset form
                     this.reset();
                     selectedTimeSlot = null;
                     document.getElementById('time-slots-grid').innerHTML = '';
@@ -1642,7 +1659,7 @@
             checkDateAndLoadSlots(getNextWeekday());
         }, 100);
 
-        // Event Listeners
+        // ===== EVENT LISTENERS =====
 
         // Toggle switch click handler
         document.getElementById('mode-toggle').addEventListener('click', toggleMode);
@@ -1651,12 +1668,10 @@
         const chatInput = document.getElementById('chat-input');
         const chatSendBtn = document.getElementById('chat-send-btn');
 
-        // Auto-resize chat input
         chatInput.addEventListener('input', function() {
             autoResizeTextarea(this);
         });
 
-        // Send message on Enter (but allow Shift+Enter for new lines)
         chatInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -1669,7 +1684,6 @@
             }
         });
 
-        // Send message on button click
         chatSendBtn.addEventListener('click', function() {
             const message = chatInput.value.trim();
             if (message) {
@@ -1682,11 +1696,17 @@
         // Initialize chat session on page load
         initChatSession();
 
-        // ✅ NEW: Initialize Vapi on page load
-        initializeVapi();
+        // ✅ Voice call button event listener
+        document.getElementById('voice-call-btn').addEventListener('click', function() {
+            console.log('🎯 Voice button clicked');
+            toggleVoiceCall();
+        });
 
-        // ✅ NEW: Event listener for voice call button
-        document.getElementById('voice-call-btn').addEventListener('click', toggleVoiceCall);
+        // Log when page is fully loaded
+        window.addEventListener('load', function() {
+            console.log('📱 Page fully loaded');
+            console.log('🎙️ Vapi SDK status:', typeof Vapi !== 'undefined' ? '✅ Loaded' : '❌ Not loaded');
+        });
     </script>
 </body>
 </html>

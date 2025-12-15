@@ -8,8 +8,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQZHXLlvWZOJyj7Yy7tcenmpD1ypASozpmTE/iPtmFIB46ZmdtAc9eNBvH0H/Zpisbw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- ✅ Vapi Web SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js"></script>
+    <!-- ✅ NO VAPI SCRIPT HERE - We load it manually in JavaScript -->
     
     <style>
         * {
@@ -112,7 +111,6 @@
             gap: 20px;
         }
 
-        /* Time Slots Grid */
         .time-slots-container {
             margin-top: 20px;
         }
@@ -226,7 +224,6 @@
             font-size: 18px;
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             top: 20px;
@@ -261,25 +258,10 @@
             background: #0d9488;
         }
 
-        body.teal-theme.iframe-mode .toast.success {
-            background: #059669;
-            border: 2px solid #047857;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-        }
-
-        body.teal-theme .toast.error {
-            background: #dc2626;
-        }
-
-        body.teal-theme .toast.warning {
-            background: #f59e0b;
-        }
-
         .toast i {
             margin-right: 8px;
         }
 
-        /* Loading States */
         .loading {
             opacity: 0.6;
             pointer-events: none;
@@ -361,7 +343,6 @@
             color: #dc2626;
         }
 
-        /* Toggle Switch */
         .toggle-container {
             display: flex;
             align-items: center;
@@ -418,7 +399,6 @@
             color: #14b8a6;
         }
 
-        /* Chat Interface */
         .chat-container {
             display: none;
             height: 500px;
@@ -598,7 +578,6 @@
             }
         }
 
-        /* Markdown Styles */
         .chat-bubble h1,
         .chat-bubble h2,
         .chat-bubble h3 {
@@ -669,7 +648,6 @@
             color: #6b7280;
         }
 
-        /* ✅ Floating Call Button with status indicators */
         .floating-call-btn {
             position: fixed;
             bottom: 20px;
@@ -698,7 +676,6 @@
             transform: scale(0.95);
         }
 
-        /* ✅ Call active state */
         .floating-call-btn.calling {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             animation: pulse 1.5s infinite;
@@ -715,7 +692,6 @@
             }
         }
 
-        /* ✅ Call status indicator */
         .call-status {
             position: fixed;
             bottom: 90px;
@@ -771,7 +747,6 @@
         </div>
 
         <div class="form-container">
-            <!-- Toggle between Form and Chat -->
             <div class="toggle-container">
                 <span class="toggle-label active" id="form-label">Booking Form</span>
                 <div class="toggle-switch" id="mode-toggle">
@@ -780,7 +755,6 @@
                 <span class="toggle-label" id="chat-label">Chat Assistant</span>
             </div>
 
-            <!-- Booking Form -->
             <form id="booking-form">
                 <div class="form-group">
                     <label for="name">Full Name</label>
@@ -806,7 +780,6 @@
                     <label>Available Time Slots</label>
                     <div class="time-slots-container">
                         <div class="time-slots-grid" id="time-slots-grid">
-                            <!-- Time slots will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -835,7 +808,6 @@
                 </a>
             </form>
 
-            <!-- Chat Interface -->
             <div class="chat-container" id="chat-container">
                 <div class="chat-messages" id="chat-messages">
                     <div class="chat-message bot">
@@ -890,49 +862,108 @@
         </div>
     </div>
 
-    <!-- ✅ Call Status Indicator -->
     <div class="call-status" id="call-status">
         <div class="indicator"></div>
         <span id="status-text">Connected</span>
     </div>
 
-    <!-- Floating Call Button -->
     <button class="floating-call-btn" id="voice-call-btn" title="Voice Booking">
         <i class="fas fa-phone" id="call-icon"></i>
     </button>
 
     <script>
-        // ===== VAPI SDK LOADER (CRITICAL - MUST BE FIRST) =====
+        // ===== VAPI SDK ROBUST LOADER WITH MULTIPLE CDN FALLBACK =====
         (function() {
-            let vapiLoadAttempts = 0;
-            const maxAttempts = 100; // 10 seconds total
+            console.log('🔧 Starting Vapi SDK robust loader...');
             
-            const checkVapiInterval = setInterval(function() {
-                vapiLoadAttempts++;
-                
-                if (typeof Vapi !== 'undefined') {
-                    console.log('✅ Vapi SDK loaded successfully');
-                    window.vapiSDKReady = true;
-                    clearInterval(checkVapiInterval);
+            const vapiCDNs = [
+                'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.0.4/dist/index.js',
+                'https://unpkg.com/@vapi-ai/web@2.0.4/dist/index.js',
+                'https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/index.js',
+                'https://unpkg.com/@vapi-ai/web@latest/dist/index.js'
+            ];
+            
+            let currentCDNIndex = 0;
+            let scriptElement = null;
+            let loadTimeout = null;
+            
+            function loadVapiScript(url) {
+                return new Promise((resolve, reject) => {
+                    console.log(`📥 Loading Vapi from CDN ${currentCDNIndex + 1}/${vapiCDNs.length}: ${url}`);
                     
-                    // Dispatch custom event
-                    window.dispatchEvent(new Event('vapiReady'));
-                } else if (vapiLoadAttempts >= maxAttempts) {
-                    console.error('❌ Vapi SDK failed to load after 10 seconds');
-                    window.vapiSDKReady = false;
-                    clearInterval(checkVapiInterval);
+                    if (scriptElement && scriptElement.parentNode) {
+                        scriptElement.parentNode.removeChild(scriptElement);
+                    }
+                    
+                    scriptElement = document.createElement('script');
+                    scriptElement.src = url;
+                    scriptElement.async = true;
+                    
+                    scriptElement.onload = function() {
+                        clearTimeout(loadTimeout);
+                        
+                        setTimeout(() => {
+                            if (typeof Vapi !== 'undefined') {
+                                console.log('✅ Vapi SDK loaded successfully from:', url);
+                                window.vapiSDKReady = true;
+                                window.dispatchEvent(new Event('vapiReady'));
+                                resolve(true);
+                            } else {
+                                console.warn('⚠️ Script loaded but Vapi not defined');
+                                reject(new Error('Vapi not defined after script load'));
+                            }
+                        }, 300);
+                    };
+                    
+                    scriptElement.onerror = function(error) {
+                        clearTimeout(loadTimeout);
+                        console.error('❌ Failed to load from:', url, error);
+                        reject(error);
+                    };
+                    
+                    loadTimeout = setTimeout(() => {
+                        if (typeof Vapi === 'undefined') {
+                            console.warn('⚠️ Timeout loading from:', url);
+                            reject(new Error('Timeout loading Vapi SDK'));
+                        }
+                    }, 8000);
+                    
+                    document.head.appendChild(scriptElement);
+                });
+            }
+            
+            async function tryLoadVapi() {
+                while (currentCDNIndex < vapiCDNs.length) {
+                    try {
+                        await loadVapiScript(vapiCDNs[currentCDNIndex]);
+                        console.log('🎉 Vapi SDK successfully loaded!');
+                        return true;
+                    } catch (error) {
+                        console.warn(`⚠️ CDN ${currentCDNIndex + 1} failed:`, error.message);
+                        currentCDNIndex++;
+                        
+                        if (currentCDNIndex < vapiCDNs.length) {
+                            console.log(`🔄 Trying next CDN (${currentCDNIndex + 1}/${vapiCDNs.length})...`);
+                        }
+                    }
                 }
-            }, 100);
+                
+                console.error('❌ All CDN sources failed to load Vapi SDK');
+                window.vapiSDKReady = false;
+                window.dispatchEvent(new Event('vapiLoadFailed'));
+                return false;
+            }
+            
+            tryLoadVapi();
         })();
 
-        // ===== WEBHOOK URLs =====
+        // ===== CONFIGURATION =====
         const MAIN_URL_MAKE_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/book2';
         const MAIN_URL_CHECK_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/book4';
         const MAIN_URL_CHAT_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/chat-booking';
         const MAIN_URL_VOICE_INIT = 'https://template-n8n.b2cvzj.easypanel.host/webhook/voice-booking-init';
         const MAIN_URL_VOICE_BOOKING = 'https://template-n8n.b2cvzj.easypanel.host/webhook/voice-booking2';
 
-        // Check for theme parameter and apply teal theme
         function checkTheme() {
             const urlParams = new URLSearchParams(window.location.search);
             const theme = urlParams.get('theme');
@@ -955,19 +986,15 @@
         let bookedSlots = [];
         let chatMode = false;
         let chatSessionId = null;
-
-        // ✅ Voice AI variables
         let vapiInstance = null;
         let isCallActive = false;
         let callStartTime = null;
         window.vapiSDKReady = false;
 
-        // Generate unique session ID
         function generateSessionId() {
             return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
 
-        // Initialize chat session
         function initChatSession() {
             chatSessionId = generateSessionId();
             console.log('📝 Chat session initialized:', chatSessionId);
@@ -975,29 +1002,55 @@
 
         // ===== VOICE AI FUNCTIONS =====
 
-        // ✅ Wait for Vapi SDK to be ready
-        async function waitForVapiSDK(maxWaitMs = 10000) {
+        async function waitForVapiSDK(maxWaitMs = 20000) {
+            console.log('⏳ Waiting for Vapi SDK (max ' + (maxWaitMs/1000) + 's)...');
             const startTime = Date.now();
             
             return new Promise((resolve, reject) => {
                 if (typeof Vapi !== 'undefined') {
+                    console.log('✅ Vapi already loaded');
                     resolve(true);
                     return;
                 }
                 
+                const onVapiReady = () => {
+                    console.log('✅ Vapi ready event received');
+                    cleanup();
+                    resolve(true);
+                };
+                
+                const onVapiLoadFailed = () => {
+                    console.error('❌ Vapi load failed event received');
+                    cleanup();
+                    reject(new Error('All CDN sources failed. Check:\n1. Internet connection\n2. Ad blocker settings\n3. Firewall/proxy'));
+                };
+                
+                const cleanup = () => {
+                    clearInterval(checkInterval);
+                    clearTimeout(timeoutHandle);
+                    window.removeEventListener('vapiReady', onVapiReady);
+                    window.removeEventListener('vapiLoadFailed', onVapiLoadFailed);
+                };
+                
+                window.addEventListener('vapiReady', onVapiReady, { once: true });
+                window.addEventListener('vapiLoadFailed', onVapiLoadFailed, { once: true });
+                
                 const checkInterval = setInterval(() => {
                     if (typeof Vapi !== 'undefined') {
-                        clearInterval(checkInterval);
+                        console.log('✅ Vapi detected via polling');
+                        cleanup();
                         resolve(true);
-                    } else if (Date.now() - startTime > maxWaitMs) {
-                        clearInterval(checkInterval);
-                        reject(new Error('Vapi SDK failed to load within timeout'));
                     }
-                }, 100);
+                }, 200);
+                
+                const timeoutHandle = setTimeout(() => {
+                    console.error('❌ Timeout waiting for Vapi SDK');
+                    cleanup();
+                    reject(new Error('SDK load timeout (' + (maxWaitMs/1000) + 's). Please refresh.'));
+                }, maxWaitMs);
             });
         }
 
-        // ✅ Setup Vapi event listeners
         function setupVapiEvents() {
             if (!vapiInstance) {
                 console.warn('⚠️ Cannot setup events: vapiInstance is null');
@@ -1006,18 +1059,16 @@
 
             console.log('🔧 Setting up Vapi event listeners...');
 
-            // Call started
             vapiInstance.on('call-start', () => {
-                console.log('✅ Voice call started');
+                console.log('✅ Call started');
                 isCallActive = true;
                 callStartTime = Date.now();
                 updateCallUI(true);
-                showToast('Voice call connected! Start speaking...', 'success');
+                showToast('🎤 Voice call connected! Start speaking...', 'success');
             });
 
-            // Call ended
             vapiInstance.on('call-end', () => {
-                console.log('📞 Voice call ended');
+                console.log('📞 Call ended');
                 isCallActive = false;
                 
                 const duration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
@@ -1026,9 +1077,8 @@
                 callStartTime = null;
             });
 
-            // Speech start (user started speaking)
             vapiInstance.on('speech-start', () => {
-                console.log('🎤 User started speaking');
+                console.log('🎤 User speaking');
                 const statusEl = document.getElementById('call-status');
                 const textEl = document.getElementById('status-text');
                 
@@ -1039,9 +1089,8 @@
                 }
             });
 
-            // Speech end (user stopped speaking)
             vapiInstance.on('speech-end', () => {
-                console.log('🤐 User stopped speaking');
+                console.log('🤐 User stopped');
                 const statusEl = document.getElementById('call-status');
                 const textEl = document.getElementById('status-text');
                 
@@ -1052,7 +1101,6 @@
                 }
             });
 
-            // Error handling
             vapiInstance.on('error', (error) => {
                 console.error('❌ Vapi error:', error);
                 showToast('Voice error: ' + (error.message || 'Connection failed'), 'error');
@@ -1060,37 +1108,31 @@
                 updateCallUI(false);
             });
 
-            // Message received (for debugging)
             vapiInstance.on('message', (message) => {
                 console.log('💬 Vapi message:', message);
             });
 
-            console.log('✅ Vapi event listeners configured');
+            console.log('✅ Event listeners configured');
         }
 
-        // ✅ Start voice call
         async function startVoiceCall() {
             try {
-                console.log('🎙️ Starting voice call...');
-                showToast('Initializing voice assistant...', 'warning');
+                console.log('🎙️ Initiating voice call...');
+                showToast('🔄 Checking voice system...', 'warning');
                 
-                // Step 1: Wait for Vapi SDK to be loaded
                 try {
-                    await waitForVapiSDK(10000);
-                    console.log('✅ Vapi SDK confirmed loaded');
+                    await waitForVapiSDK(20000);
+                    console.log('✅ Vapi SDK ready');
                 } catch (error) {
-                    throw new Error('Vapi SDK not loaded. Please refresh the page and try again.');
+                    throw new Error('Voice SDK not loaded:\n• Check internet connection\n• Disable ad blockers\n• Allow scripts from CDN\n• Refresh page');
                 }
                 
-                showToast('Connecting to voice assistant...', 'warning');
+                showToast('📡 Connecting to voice assistant...', 'warning');
                 
-                // Step 2: Get Vapi config from n8n
                 console.log('📡 Fetching voice config from n8n...');
                 const response = await fetch(MAIN_URL_VOICE_INIT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         sessionId: chatSessionId || generateSessionId(),
                         timestamp: new Date().toISOString(),
@@ -1099,80 +1141,61 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: Failed to connect to n8n webhook. Check if webhook is active.`);
+                    throw new Error(`N8N server error (HTTP ${response.status}). Check webhook status.`);
                 }
 
                 const config = await response.json();
-                console.log('✅ Voice config received:', {
+                console.log('✅ Config received:', {
                     success: config.success,
                     hasPublicKey: !!config.publicKey,
                     hasAssistantId: !!config.assistantId
                 });
 
-                // Step 3: Validate config
-                if (!config.success) {
-                    throw new Error(config.error || 'Failed to get voice configuration from n8n');
+                if (!config.success || !config.publicKey || !config.assistantId) {
+                    throw new Error('Invalid server config. Check n8n workflow response format.');
                 }
 
-                if (!config.publicKey) {
-                    throw new Error('Missing publicKey in n8n response. Check webhook configuration.');
-                }
-
-                if (!config.assistantId) {
-                    throw new Error('Missing assistantId in n8n response. Check webhook configuration.');
-                }
-
-                // Step 4: Initialize Vapi if not already done
                 if (!vapiInstance) {
-                    console.log('🔧 Initializing Vapi with public key...');
+                    console.log('🔧 Creating Vapi instance...');
                     vapiInstance = new Vapi(config.publicKey);
                     setupVapiEvents();
-                    console.log('✅ Vapi instance created');
                 }
 
-                // Step 5: Start the call
                 console.log('📞 Starting call with assistant:', config.assistantId);
                 await vapiInstance.start(config.assistantId);
-                console.log('✅ Call start initiated');
                 
             } catch (error) {
                 console.error('❌ Voice call error:', error);
                 
-                // User-friendly error messages
-                let errorMessage = 'Failed to start call: ';
-                
-                if (error.message.includes('Vapi SDK')) {
-                    errorMessage = '❌ Voice SDK not loaded. Please refresh the page.';
-                } else if (error.message.includes('HTTP') || error.message.includes('webhook')) {
-                    errorMessage = '❌ Cannot connect to server. Check if n8n webhook is active.';
-                } else if (error.message.includes('publicKey') || error.message.includes('assistantId')) {
-                    errorMessage = '❌ Configuration error. Check n8n webhook response format.';
-                } else if (error.message.includes('microphone') || error.message.includes('permission')) {
-                    errorMessage = '❌ Microphone access denied. Please allow microphone permission.';
+                let errorMsg = '❌ Call failed: ';
+                if (error.message.includes('SDK') || error.message.includes('CDN')) {
+                    errorMsg = '❌ Voice SDK failed to load. Check internet & refresh page.';
+                } else if (error.message.includes('server') || error.message.includes('HTTP')) {
+                    errorMsg = '❌ Server error. Check n8n webhook is active.';
+                } else if (error.message.includes('config')) {
+                    errorMsg = '❌ Config error. Check n8n response format.';
+                } else if (error.message.includes('microphone')) {
+                    errorMsg = '❌ Microphone access denied. Check browser permissions.';
                 } else {
-                    errorMessage = '❌ ' + error.message;
+                    errorMsg += error.message.split('\n')[0];
                 }
                 
-                showToast(errorMessage, 'error');
+                showToast(errorMsg, 'error');
                 isCallActive = false;
                 updateCallUI(false);
             }
         }
 
-        // ✅ Stop voice call
         function stopVoiceCall() {
             if (vapiInstance && isCallActive) {
-                console.log('🛑 Stopping voice call...');
+                console.log('🛑 Stopping call...');
                 vapiInstance.stop();
                 showToast('Ending call...', 'warning');
-            } else {
-                console.warn('⚠️ Cannot stop: No active call');
             }
         }
 
-        // ✅ Toggle voice call (start/stop)
         function toggleVoiceCall() {
-            console.log('🔄 Toggle voice call. Current state:', isCallActive ? 'active' : 'inactive');
+            console.log('🔄 Toggle call. Active:', isCallActive);
             
             if (!isCallActive) {
                 startVoiceCall();
@@ -1181,34 +1204,27 @@
             }
         }
 
-        // ✅ Update UI based on call status
         function updateCallUI(active) {
             const btn = document.getElementById('voice-call-btn');
             const icon = document.getElementById('call-icon');
             const status = document.getElementById('call-status');
             
-            if (!btn || !icon || !status) {
-                console.warn('⚠️ UI elements not found');
-                return;
-            }
+            if (!btn || !icon || !status) return;
             
             if (active) {
                 btn.classList.add('calling');
                 icon.className = 'fas fa-phone-slash';
                 status.classList.add('active', 'listening');
                 document.getElementById('status-text').textContent = 'Connected';
-                console.log('🟢 UI updated: Call active');
             } else {
                 btn.classList.remove('calling');
                 icon.className = 'fas fa-phone';
                 status.classList.remove('active', 'listening', 'speaking');
-                console.log('🔴 UI updated: Call inactive');
             }
         }
 
-        // ===== OTHER FUNCTIONS (Form, Chat, etc.) =====
+        // ===== OTHER FUNCTIONS =====
 
-        // Markdown to HTML converter
         function markdownToHtml(markdown) {
             return markdown
                 .replace(/### (.*?)$/gm, '<h3>$1</h3>')
@@ -1223,16 +1239,9 @@
                 .replace(/<p>(<h[1-3]>.*?<\/h[1-3]>)<\/p>/g, '$1')
                 .replace(/- (.*?)<br>/g, '<li>$1</li>')
                 .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
-                .replace(/<\/ul><br><ul>/g, '')
-                .replace(/✓/g, '✅')
-                .replace(/✗/g, '❌')
-                .replace(/→/g, '➡️')
-                .replace(/•/g, '•')
-                .replace(/⚠/g, '⚠️')
-                .replace(/ℹ/g, 'ℹ️');
+                .replace(/<\/ul><br><ul>/g, '');
         }
 
-        // Toggle between form and chat modes
         function toggleMode() {
             chatMode = !chatMode;
 
@@ -1267,7 +1276,6 @@
             }
         }
 
-        // Add chat message
         function addChatMessage(message, isUser = false) {
             const chatMessages = document.getElementById('chat-messages');
             const messageDiv = document.createElement('div');
@@ -1293,22 +1301,16 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Show typing indicator
         function showTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            typingIndicator.classList.add('show');
-
+            document.getElementById('typing-indicator').classList.add('show');
             const chatMessages = document.getElementById('chat-messages');
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Hide typing indicator
         function hideTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            typingIndicator.classList.remove('show');
+            document.getElementById('typing-indicator').classList.remove('show');
         }
 
-        // Send chat message
         async function sendChatMessage(message) {
             if (!message.trim()) return;
 
@@ -1331,7 +1333,6 @@
                 });
 
                 const data = await response.json();
-                console.log('Chat response:', data);
 
                 hideTypingIndicator();
 
@@ -1359,13 +1360,11 @@
             }
         }
 
-        // Auto-resize textarea
         function autoResizeTextarea(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
         }
 
-        // Test data scenarios
         const testScenarios = {
             'valid': {
                 name: 'John Doe',
@@ -1486,13 +1485,8 @@
                 },
                 body: JSON.stringify({ date: date })
             })
-            .then(response => {
-                console.log('Response status:', response.status);
-                return response.text();
-            })
+            .then(response => response.text())
             .then(text => {
-                console.log('Response text:', text);
-
                 if (!text || text.trim() === '') {
                     throw new Error('Server returned empty response');
                 }
@@ -1500,13 +1494,10 @@
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    console.error('Failed to parse JSON:', e);
                     throw new Error('Invalid JSON response from server');
                 }
             })
             .then(data => {
-                console.log('Parsed data:', data);
-
                 if (data.success) {
                     if (data.isHoliday) {
                         timeSlotsGrid.innerHTML = `<div style="text-align: center; padding: 20px; color: #dc2626;">${data.holidayMessage}</div>`;
@@ -1572,7 +1563,6 @@
             console.log('Selected time slot:', time);
         }
 
-        // Date change handler
         document.getElementById('date').addEventListener('change', function(e) {
             const selectedDate = e.target.value;
             if (selectedDate) {
@@ -1581,7 +1571,6 @@
             }
         });
 
-        // Form submission handler
         document.getElementById('booking-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -1616,8 +1605,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Response:', data);
-
                 if (data.success) {
                     showToast(data.confirmationMessage || 'Booking confirmed!', 'success');
 
@@ -1635,7 +1622,6 @@
                     this.reset();
                     selectedTimeSlot = null;
                     document.getElementById('time-slots-grid').innerHTML = '';
-                    const submitButton = this.querySelector('button[type="submit"]');
                     submitButton.disabled = true;
                 } else {
                     showToast(data.error || data.message || 'Booking failed', 'error');
@@ -1651,20 +1637,14 @@
             });
         });
 
-        // Set default date to next weekday
         document.getElementById('date').value = getNextWeekday();
 
-        // Load time slots for default date
         setTimeout(() => {
             checkDateAndLoadSlots(getNextWeekday());
         }, 100);
 
-        // ===== EVENT LISTENERS =====
-
-        // Toggle switch click handler
         document.getElementById('mode-toggle').addEventListener('click', toggleMode);
 
-        // Chat input handlers
         const chatInput = document.getElementById('chat-input');
         const chatSendBtn = document.getElementById('chat-send-btn');
 
@@ -1693,19 +1673,16 @@
             }
         });
 
-        // Initialize chat session on page load
         initChatSession();
 
-        // ✅ Voice call button event listener
         document.getElementById('voice-call-btn').addEventListener('click', function() {
             console.log('🎯 Voice button clicked');
             toggleVoiceCall();
         });
 
-        // Log when page is fully loaded
         window.addEventListener('load', function() {
-            console.log('📱 Page fully loaded');
-            console.log('🎙️ Vapi SDK status:', typeof Vapi !== 'undefined' ? '✅ Loaded' : '❌ Not loaded');
+            console.log('📱 Page loaded');
+            console.log('🎙️ Vapi SDK status:', typeof Vapi !== 'undefined' ? '✅ Loaded' : '⏳ Loading...');
         });
     </script>
 </body>
